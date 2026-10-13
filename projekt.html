@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snake - Zmienne Mapy</title>
+    <link rel="stylesheet" href="styl.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <header>
+        <h1> SNAKE <span></span></h1>
+        <p>Jedna gra, cztery zmieniające się mapy</p>
+    </header>
+    <main class="layout">
+        <section class="game-section">
+            <div class="map-info">
+                <strong id="map-name">CITY</strong>
+                <span>Zmiana mapy za <strong id="map-time">20</strong> s</span>
+            </div>
+            <div class="board-box" id="board-box">
+                <canvas id="board" width="600" height="600"></canvas>
+
+                <div class="overlay" id="overlay">
+                    <div class="overlay-card">
+                        <div class="emoji"></div>
+                        <h2 id="overlay-title">Gotowosc</h2>
+                        <p id="overlay-desc">Zbieraj jedzenie i unikaj przeszkód. Co 20 sekund mapa się zmienia!</p>
+                        <button id="overlay-btn" type="button"> Rozpocznij</button>
+                    </div>
+                </div>
+
+                <div id="map-banner" class="map-banner">NOWA MAPA</div>
+                <div id="score-float" class="score-float">._./10</div>
+            </div>
+
+            <p id="message" class="message">Sterowanie: strzałki lub WASD. Spacja = pauza.</p>
+        </section>
+
+        <aside class="sidebar">
+            <div class="card">
+                <p class="label">WYNIK</p>
+                <strong id="score" class="score">0</strong>
+                <div class="stat"><span> Rekord</span><strong id="best">0</strong></div>
+                <div class="stat"><span> Owoce</span><strong id="eaten">0</strong></div>
+                <div class="stat"><span> Poziom szybkości</span><strong id="speed">1</strong></div>
+            </div>
+
+            <div class="card buttons">
+                <button id="start-btn" type="button"> Nowa gra</button>
+                <button id="pause-btn" type="button" disabled>Ⅱ Pauza</button>
+            </div>
+
+            <div class="card">
+                <p class="label">STEROWANIE</p>
+                <div class="arrows">
+                    <button data-dir="up" type="button">↑</button>
+                    <div>
+                        <button data-dir="left" type="button">←</button>
+                        <button data-dir="down" type="button">↓</button>
+                        <button data-dir="right" type="button">→</button>
+           </div>
+    </div>
+      <p class="tip">W, A, S, D lub strzałki. Unikaj czerwonych przeszkód!</p>       </div>
+        </aside>
+    </main>
+</body>
+</html>
