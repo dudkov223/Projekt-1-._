@@ -1,68 +1,341 @@
-<!DOCTYPE html>
-<html lang="pl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Snake - Zmienne Mapy</title>
-    <link rel="stylesheet" href="styl.css">
-    <script src="script.js" defer></script>
-</head>
-<body>
-    <header>
-        <h1> SNAKE <span></span></h1>
-        <p>Jedna gra, cztery zmieniające się mapy</p>
-    </header>
-    <main class="layout">
-        <section class="game-section">
-            <div class="map-info">
-                <strong id="map-name">CITY</strong>
-                <span>Zmiana mapy za <strong id="map-time">20</strong> s</span>
-            </div>
-            <div class="board-box" id="board-box">
-                <canvas id="board" width="600" height="600"></canvas>
 
+<!-- DOCTYPE - określa standard HTML5 / Defines HTML5 -->
+<!DOCTYPE html>
+
+<!-- html - główny element strony, lang - język / Main page element, language -->
+<html lang="pl">
+
+<!-- head - zawiera ustawienia strony / Contains page settings -->
+<head>
+
+    <!-- meta - informacje o stronie, charset - kodowanie polskich znaków -->
+    <!-- Page information, character encoding -->
+    <meta charset="UTF-8">
+
+    <!-- viewport - ustawia widok strony na urządzeniu / Sets the page viewport -->
+    <!-- width=device-width - szerokość urządzenia / Device width -->
+    <!-- initial-scale=1.0 - początkowa skala 100% / Initial scale 100% -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- title - tytuł karty, tutaj nazwa gry / Browser tab title, game name -->
+    <title>Snake World — Zmienne Mapy</title>
+
+    <!-- link - podłącza plik CSS z wyglądem gry / Links the game's CSS file -->
+    <!-- rel - typ pliku, href - jego ścieżka / File type and path -->
+    <link rel="stylesheet" href="styl.css">
+
+    <!-- script - podłącza JS sterujący grą / Loads JavaScript controlling the game -->
+    <!-- src - ścieżka pliku, defer - uruchamia po przetworzeniu HTML -->
+    <!-- File path, runs after HTML parsing -->
+    <script src="script.js" defer></script>
+
+</head>
+
+<!-- body - widoczna część strony, tutaj cała gra / Visible content, the whole game -->
+<body>
+
+    <!-- header - nagłówek, tutaj górny pasek gry / Header, game top bar -->
+    <!-- class - przypisuje klasę używaną w CSS lub JS / Assigns a class for CSS or JS -->
+    <header class="topbar">
+
+        <!-- div - kontener do grupowania elementów, tutaj nazwa i opis gry -->
+        <!-- Container for grouping elements, here game title and description -->
+        <div class="brand">
+
+            <!-- h1 - główny nagłówek, tutaj SNAKE WORLD / Main heading, game title -->
+            <!-- span - wydziela fragment tekstu, tutaj WORLD / Separates part of text -->
+            <h1>🐍 SNAKE <span>WORLD</span></h1>
+
+            <!-- p - akapit, tutaj opis gry / Paragraph, here game description -->
+            <!-- data-i18n - klucz tłumaczenia dla JS / Translation key for JS -->
+            <p data-i18n="subtitle">Jedna gra, cztery zmieniające się mapy</p>
+
+        </div>
+
+        <!-- div - grupuje elementy, tutaj ustawienia / Groups elements, here settings -->
+        <div class="settings">
+
+            <!-- label - opis pola, tutaj motyw / Field label, here theme -->
+            <!-- for - łączy opis z polem o danym id / Connects label to element ID -->
+            <label for="theme-select" data-i18n="themeLabel">Motyw</label>
+
+            <!-- select - rozwijana lista, tutaj wybór motywu / Dropdown for theme selection -->
+            <!-- id - unikalny identyfikator używany przez CSS i JS / Unique identifier -->
+            <select id="theme-select">
+
+                <!-- option - opcja, value - wartość odczytywana przez JS -->
+                <!-- Dropdown option, value read by JS -->
+                <option value="dark" data-i18n="darkTheme">🌙 Ciemny</option>
+                <option value="light" data-i18n="lightTheme">☀️ Jasny</option>
+
+            </select>
+
+            <!-- label - opis wyboru grafiki / Graphics selection label -->
+            <label for="graphics-select" data-i18n="graphicsLabel">Grafika</label>
+
+            <!-- select - wybór stylu węża / Selects snake graphics -->
+            <!-- aria-label - opis dla czytników ekranu / Screen reader label -->
+            <select id="graphics-select" aria-label="Styl graficzny">
+                <option value="modern" data-i18n="modernGraphics">✨ Nowoczesny</option>
+                <option value="retro" data-i18n="retroGraphics">▣ Retro</option>
+            </select>
+
+            <!-- label - opis trudności / Difficulty label -->
+            <label for="difficulty-select" data-i18n="difficultyLabel">Trudność</label>
+
+            <!-- select - wybór poziomu gry / Selects game difficulty -->
+            <select id="difficulty-select" aria-label="Poziom trudności">
+                <option value="normal" data-i18n="normalMode">Normalny</option>
+                <option value="hard" data-i18n="hardMode">Trudny ☠</option>
+            </select>
+
+            <!-- label - opis wyboru języka / Language label -->
+            <label for="language-select" data-i18n="languageLabel">Język</label>
+
+            <!-- select - lista wyboru języka / Language dropdown -->
+            <select id="language-select">
+                <option value="pl">Polski</option>
+                <option value="en">English</option>
+            </select>
+
+        </div>
+    </header>
+
+
+    <!-- main - główna część strony, tutaj plansza i panel boczny -->
+    <!-- Main content, game board and sidebar -->
+    <main class="layout">
+
+        <!-- section - wydzielona sekcja, tutaj obszar gry -->
+        <!-- Separate section, here the game area -->
+        <section class="game-section">
+
+            <!-- div - kontener, tutaj nazwa mapy i czas / Container for map name and timer -->
+            <div class="map-info">
+
+                <!-- strong - oznacza ważny tekst, tutaj nazwę mapy -->
+                <!-- Marks important text, here map name -->
+                <strong id="map-name">NEON CITY</strong>
+
+                <!-- span - grupuje tekst w linii, tutaj odliczanie -->
+                <!-- Groups inline text, here countdown -->
+                <span>
+                    <span data-i18n="nextMap">Zmiana mapy za</span>
+                    <strong id="map-time">20</strong> s
+                </span>
+
+            </div>
+
+            <!-- div - kontener planszy, menu i animacji / Container for board, menu and effects -->
+            <div class="board-box" id="board-box">
+
+                <!-- canvas - obszar rysowania, tutaj JS rysuje węża, owoce i przeszkody -->
+                <!-- Drawing area where JS draws the snake, food and obstacles -->
+                <!-- width i height - rozmiar planszy w pikselach / Board dimensions in pixels -->
+                <canvas id="board" width="600" height="600"
+                    aria-label="Plansza gry Snake"></canvas>
+
+                <!-- div - kontener, tutaj warstwa menu nad grą -->
+                <!-- Container, here menu over the game -->
                 <div class="overlay" id="overlay">
+
+                    <!-- div - grupuje zawartość okna menu / Groups menu window content -->
                     <div class="overlay-card">
-                        <div class="emoji"></div>
-                        <h2 id="overlay-title">Gotowosc</h2>
-                        <p id="overlay-desc">Zbieraj jedzenie i unikaj przeszkód. Co 20 sekund mapa się zmienia!</p>
-                        <button id="overlay-btn" type="button"> Rozpocznij</button>
+
+                        <!-- div - kontener, tutaj emoji węża / Container for snake emoji -->
+                        <div class="emoji">🐍</div>
+
+                        <!-- h2 - nagłówek drugiego poziomu, tutaj tytuł komunikatu -->
+                        <!-- Second-level heading, here message title -->
+                        <h2 id="overlay-title">Gotowy do gry?</h2>
+
+                        <!-- p - akapit, tutaj opis komunikatu gry -->
+                        <!-- Paragraph, here game message description -->
+                        <p id="overlay-desc">
+                            Zbieraj jedzenie i unikaj przeszkód.
+                            Co 20 sekund mapa się zmienia!
+                        </p>
+
+                        <!-- button - przycisk, tutaj rozpoczyna lub wznawia grę -->
+                        <!-- Button, here starts or resumes the game -->
+                        <!-- type="button" - zwykły przycisk / Regular button -->
+                        <button id="overlay-btn" type="button">▶ Rozpocznij</button>
+
+                        <!-- div - grupuje pola zapisu wyniku / Groups score saving fields -->
+                        <!-- hidden - początkowo ukrywa element / Initially hides the element -->
+                        <div id="save-score-box" class="save-score-box" hidden>
+
+                            <!-- label - opis pola, tutaj nazwa gracza / Label for player name -->
+                            <label for="player-name" data-i18n="nameLabel">
+                                Twoja nazwa do rankingu
+                            </label>
+
+                            <!-- input - pole wpisywania, tutaj nick gracza / Input for player nickname -->
+                            <!-- type="text" - pole tekstowe / Text input -->
+                            <!-- maxlength - limit znaków / Character limit -->
+                            <!-- autocomplete - podpowiedzi danych / Autofill suggestions -->
+                            <!-- placeholder - podpowiedź w polu / Input hint -->
+                            <input id="player-name" type="text"
+                                maxlength="16" autocomplete="nickname"
+                                placeholder="Gracz">
+
+                            <!-- button - przycisk, tutaj zapisuje punkty / Button for saving score -->
+                            <button id="save-score-btn" type="button"
+                                data-i18n="saveScore">💾 Zapisz wynik</button>
+
+                            <!-- p - akapit, tutaj potwierdzenie zapisu / Paragraph for save confirmation -->
+                            <!-- aria-live - informuje czytnik ekranu o zmianach / Announces updates -->
+                            <p id="save-score-feedback" aria-live="polite"></p>
+
+                        </div>
                     </div>
                 </div>
 
-                <div id="map-banner" class="map-banner">NOWA MAPA</div>
-                <div id="score-float" class="score-float">._./10</div>
+                <!-- div - kontener komunikatu o nowej mapie / New map message container -->
+                <div id="map-banner" class="map-banner"
+                    aria-live="polite"></div>
+
+                <!-- div - kontener animacji zdobytych punktów / Points animation container -->
+                <div id="score-float" class="score-float">+10</div>
+
             </div>
 
-            <p id="message" class="message">Sterowanie: strzałki lub WASD. Spacja = pauza.</p>
+            <!-- p - akapit, tutaj opis trudności / Paragraph with difficulty information -->
+            <p id="difficulty-hint" class="difficulty-hint"></p>
+
+            <!-- p - akapit, tutaj komunikaty podczas gry / Paragraph for in-game messages -->
+            <p id="message" class="message" aria-live="polite">
+                Sterowanie: strzałki lub WASD. Spacja = pauza.
+            </p>
+
         </section>
 
+
+        <!-- aside - dodatkowa sekcja, tutaj wyniki, ranking i sterowanie -->
+        <!-- Additional section for scores, ranking and controls -->
         <aside class="sidebar">
+
+            <!-- div - kontener, tutaj statystyki gracza / Container for player statistics -->
             <div class="card">
-                <p class="label">WYNIK</p>
+
+                <!-- p - akapit, tutaj napis WYNIK / Paragraph for score label -->
+                <p class="label" data-i18n="scoreLabel">WYNIK</p>
+
+                <!-- strong - ważny tekst, tutaj punkty gracza / Important text, player score -->
                 <strong id="score" class="score">0</strong>
-                <div class="stat"><span> Rekord</span><strong id="best">0</strong></div>
-                <div class="stat"><span> Owoce</span><strong id="eaten">0</strong></div>
-                <div class="stat"><span> Poziom szybkości</span><strong id="speed">1</strong></div>
+
+                <!-- div - grupuje elementy statystyki, tutaj rekord -->
+                <!-- Groups statistic elements, here best score -->
+                <div class="stat">
+                    <span data-i18n="bestLabel">🏆 Rekord</span>
+                    <strong id="best">0</strong>
+                </div>
+
+                <!-- div - kontener liczby owoców / Container for fruit count -->
+                <div class="stat">
+                    <span data-i18n="fruitsLabel">🍎 Owoce</span>
+                    <strong id="eaten">0</strong>
+                </div>
+
+                <!-- div - kontener poziomu szybkości / Container for speed level -->
+                <div class="stat">
+                    <span data-i18n="levelLabel">⚡ Poziom szybkości</span>
+                    <strong id="speed">1</strong>
+                </div>
+
             </div>
 
+
+            <!-- div - kontener rankingu TOP 10 / Container for TOP 10 leaderboard -->
+            <!-- Dwie klasy nadają różne style / Two classes can apply different styles -->
+            <div class="card ranking-card">
+
+                <!-- div - grupuje tytuł i filtr rankingu / Groups ranking title and filter -->
+                <div class="ranking-header">
+
+                    <!-- p - akapit, tutaj tytuł rankingu / Paragraph for ranking title -->
+                    <p class="label" data-i18n="rankingTitle">
+                        🏆 RANKING TOP 10
+                    </p>
+
+                    <!-- select - lista, tutaj wybiera ranking według trudności -->
+                    <!-- Dropdown for filtering the leaderboard by difficulty -->
+                    <select id="ranking-filter" aria-label="Ranking trudności">
+                        <option value="normal" data-i18n="normalMode">Normalny</option>
+                        <option value="hard" data-i18n="hardMode">Trudny ☠</option>
+                    </select>
+
+                </div>
+
+                <!-- ol - lista numerowana, tutaj najlepsze wyniki / Ordered list of top scores -->
+                <!-- li - element listy dodawany przez JS / List item added by JS -->
+                <ol id="ranking-list" class="ranking-list"></ol>
+
+                <!-- p - akapit, tutaj informacja o pustym rankingu -->
+                <!-- Paragraph for empty leaderboard message -->
+                <p id="ranking-empty" class="ranking-empty"></p>
+
+                <!-- p - akapit, tutaj informacja o przechowywaniu punktów -->
+                <!-- Paragraph explaining where scores are stored -->
+                <p class="ranking-note" data-i18n="rankingNote">
+                    Wyniki zapisują się w tej przeglądarce.
+                </p>
+
+            </div>
+
+
+            <!-- div - grupuje przyciski gry / Groups game buttons -->
             <div class="card buttons">
-                <button id="start-btn" type="button"> Nowa gra</button>
-                <button id="pause-btn" type="button" disabled>Ⅱ Pauza</button>
+
+                <!-- button - przycisk, tutaj uruchamia nową grę -->
+                <!-- Button for starting a new game -->
+                <button id="start-btn" type="button" data-i18n="newGame">
+                    ↻ Nowa gra
+                </button>
+
+                <!-- button - przycisk, tutaj pauza i wznowienie / Pause and resume button -->
+                <!-- disabled - wyłącza przycisk na początku / Initially disables the button -->
+                <button id="pause-btn" type="button" disabled>
+                    Ⅱ Pauza
+                </button>
+
             </div>
 
+
+            <!-- div - kontener, tutaj sterowanie wężem / Container for snake controls -->
             <div class="card">
-                <p class="label">STEROWANIE</p>
+
+                <!-- p - akapit, tutaj nagłówek sterowania / Paragraph for controls heading -->
+                <p class="label" data-i18n="controlsLabel">STEROWANIE</p>
+
+                <!-- div - grupuje przyciski strzałek / Groups arrow buttons -->
                 <div class="arrows">
-                    <button data-dir="up" type="button">↑</button>
+
+                    <!-- button - przycisk, tutaj ruch w górę / Button for moving up -->
+                    <!-- data-dir - zapisuje kierunek dla JS / Stores direction for JS -->
+                    <button data-dir="up" type="button" aria-label="Up">↑</button>
+
+                    <!-- div - grupuje dolne strzałki / Groups bottom arrows -->
                     <div>
-                        <button data-dir="left" type="button">←</button>
-                        <button data-dir="down" type="button">↓</button>
-                        <button data-dir="right" type="button">→</button>
-           </div>
-    </div>
-      <p class="tip">W, A, S, D lub strzałki. Unikaj czerwonych przeszkód!</p>       </div>
+
+                        <!-- button - przyciski ruchu w lewo, dół i prawo -->
+                        <!-- Buttons for moving left, down and right -->
+                        <button data-dir="left" type="button" aria-label="Left">←</button>
+                        <button data-dir="down" type="button" aria-label="Down">↓</button>
+                        <button data-dir="right" type="button" aria-label="Right">→</button>
+
+                    </div>
+                </div>
+
+                <!-- p - akapit, tutaj instrukcja sterowania / Paragraph for control instructions -->
+                <p class="tip" data-i18n="tip">
+                    W, A, S, D lub strzałki. Unikaj przeszkód!
+                </p>
+
+            </div>
+
         </aside>
     </main>
+
 </body>
 </html>
