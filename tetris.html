@@ -1,0 +1,563 @@
+
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tetris Classic — Arcade Hub</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 18px;
+            color: white;
+            background: #222;
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+
+        h1 {
+            color: #00ff88;
+            margin: 12px 0;
+        }
+
+        a {
+            color: #ddd;
+        }
+
+        .game {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .stats {
+            display: flex;
+            gap: 30px;
+            font-size: 18px;
+        }
+
+        canvas {
+            display: block;
+            width: min(300px, 90vw);
+            height: auto;
+            background: black;
+            border: 3px solid white;
+        }
+
+        button {
+            border: 1px solid #aaa;
+            border-radius: 4px;
+            background: #444;
+            color: white;
+            padding: 10px 12px;
+            cursor: pointer;
+            font: inherit;
+        }
+
+        button:hover {
+            background: #666;
+        }
+
+        .buttons {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 5px;
+            max-width: 600px;
+        }
+
+        .sound-controls button {
+            font-size: 12px;
+        }
+
+        p {
+            margin: 5px 0;
+            color: #ccc;
+        }
+
+        #message {
+            color: #00ff88;
+            font-weight: bold;
+            min-height: 20px;
+        }
+
+        .game:fullscreen {
+            width: 100%;
+            height: 100%;
+            padding: 12px;
+            overflow: auto;
+            justify-content: center;
+            background: #222;
+        }
+
+        .game:fullscreen canvas {
+            height: min(67dvh, 600px);
+            width: auto;
+        }
+
+        @media (max-height: 550px) {
+            .game:fullscreen {
+                justify-content: flex-start;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <a href="index.html">← Wróć do menu</a>
+
+    <h1>TETRIS</h1>
+
+    <div class="game" id="game">
+        <div class="stats">
+            <span>Punkty: <b id="score">0</b></span>
+            <span>Linie: <b id="lines">0</b></span>
+        </div>
+
+        <canvas
+            id="board"
+            width="300"
+            height="600"
+        ></canvas>
+
+        <div class="buttons">
+            <button id="start-btn">Nowa gra</button>
+            <button id="pause-btn">Pauza</button>
+            <button id="fullscreen-btn">Pełny ekran</button>
+        </div>
+
+        <div class="buttons sound-controls">
+            <button id="sound-btn">🔊 Dźwięk WŁ.</button>
+            <button id="music-btn">🎵 Muzyka WŁ.</button>
+        </div>
+
+        <p id="message">
+            Kliknij „Nowa gra”, aby rozpocząć.
+        </p>
+
+        <p>
+            ← → Przesuwanie |
+            ↑ Obrót |
+            ↓ W dół |
+            Spacja: zrzut |
+            P: pauza
+        </p>
+
+        <div class="buttons">
+            <button id="left-btn">←</button>
+            <button id="rotate-btn">↻</button>
+            <button id="right-btn">→</button>
+            <button id="down-btn">↓</button>
+            <button id="drop-btn">Zrzuć</button>
+        </div>
+    </div>
+
+    <script src="audio.js"></script>
+
+    <script>
+        const canvas = document.getElementById("board");
+        const ctx = canvas.getContext("2d");
+
+        const cols = 10;
+        const rows = 20;
+        const size = 30;
+
+        const shapes = [
+            [[1, 1, 1, 1]],
+            [[1, 1], [1, 1]],
+            [[0, 1, 0], [1, 1, 1]],
+            [[1, 0, 0], [1, 1, 1]],
+            [[0, 0, 1], [1, 1, 1]],
+            [[0, 1, 1], [1, 1, 0]],
+            [[1, 1, 0], [0, 1, 1]]
+        ];
+
+        const colors = [
+            "cyan",
+            "yellow",
+            "purple",
+            "blue",
+            "orange",
+            "lime",
+            "red"
+        ];
+
+        let board = [];
+        let piece = null;
+
+        let score = 0;
+        let lines = 0;
+
+        let running = false;
+        let paused = false;
+        let timer = null;
+
+        ArcadeAudio.init("tetris");
+
+        function createBoard() {
+            board = Array.from(
+                { length: rows },
+                () => Array(cols).fill("")
+            );
+        }
+
+        function newPiece() {
+            const number = Math.floor(
+                Math.random() * shapes.length
+            );
+
+            const shape = shapes[number].map(
+                row => [...row]
+            );
+
+            return {
+                shape: shape,
+                color: colors[number],
+                x: Math.floor((cols - shape[0].length) / 2),
+                y: 0
+            };
+        }
+
+        function drawBlock(x, y, color) {
+            ctx.fillStyle = color;
+
+            ctx.fillRect(
+                x * size + 1,
+                y * size + 1,
+                size - 2,
+                size - 2
+            );
+        }
+
+        function draw() {
+            ctx.fillStyle = "black";
+            ctx.fillRect(0, 0, 300, 600);
+
+            ctx.strokeStyle = "#333";
+
+            for (let x = 0; x <= cols; x++) {
+                ctx.beginPath();
+                ctx.moveTo(x * size, 0);
+                ctx.lineTo(x * size, 600);
+                ctx.stroke();
+            }
+
+            for (let y = 0; y <= rows; y++) {
+                ctx.beginPath();
+                ctx.moveTo(0, y * size);
+                ctx.lineTo(300, y * size);
+                ctx.stroke();
+            }
+
+            for (let y = 0; y < rows; y++) {
+                for (let x = 0; x < cols; x++) {
+                    if (board[y][x]) {
+                        drawBlock(x, y, board[y][x]);
+                    }
+                }
+            }
+
+            if (piece) {
+                for (let y = 0; y < piece.shape.length; y++) {
+                    for (let x = 0; x < piece.shape[y].length; x++) {
+                        if (piece.shape[y][x]) {
+                            drawBlock(
+                                piece.x + x,
+                                piece.y + y,
+                                piece.color
+                            );
+                        }
+                    }
+                }
+            }
+        }
+
+        function collision(shape, posX, posY) {
+            for (let y = 0; y < shape.length; y++) {
+                for (let x = 0; x < shape[y].length; x++) {
+                    if (shape[y][x] === 0) {
+                        continue;
+                    }
+
+                    const newX = posX + x;
+                    const newY = posY + y;
+
+                    if (
+                        newX < 0 ||
+                        newX >= cols ||
+                        newY >= rows
+                    ) {
+                        return true;
+                    }
+
+                    if (
+                        newY >= 0 &&
+                        board[newY][newX] !== ""
+                    ) {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        function move(dx) {
+            if (!running || paused) return;
+
+            if (
+                !collision(
+                    piece.shape,
+                    piece.x + dx,
+                    piece.y
+                )
+            ) {
+                piece.x += dx;
+                ArcadeAudio.effect("move");
+            }
+
+            draw();
+        }
+
+        function rotate() {
+            if (!running || paused) return;
+
+            const old = piece.shape;
+            const rotated = [];
+
+            for (let x = 0; x < old[0].length; x++) {
+                const row = [];
+
+                for (let y = old.length - 1; y >= 0; y--) {
+                    row.push(old[y][x]);
+                }
+
+                rotated.push(row);
+            }
+
+            if (!collision(rotated, piece.x, piece.y)) {
+                piece.shape = rotated;
+                ArcadeAudio.effect("rotate");
+            }
+
+            draw();
+        }
+
+        function savePiece() {
+            for (let y = 0; y < piece.shape.length; y++) {
+                for (let x = 0; x < piece.shape[y].length; x++) {
+                    if (piece.shape[y][x] === 1) {
+                        board[piece.y + y][piece.x + x] =
+                            piece.color;
+                    }
+                }
+            }
+        }
+
+        function checkLines() {
+            let removed = 0;
+
+            for (let y = rows - 1; y >= 0; y--) {
+                if (
+                    board[y].every(cell => cell !== "")
+                ) {
+                    board.splice(y, 1);
+                    board.unshift(Array(cols).fill(""));
+
+                    score += 100;
+                    lines++;
+                    removed++;
+
+                    y++;
+                }
+            }
+
+            if (removed > 0) {
+                ArcadeAudio.effect("line");
+            }
+
+            document.getElementById("score").textContent =
+                score;
+
+            document.getElementById("lines").textContent =
+                lines;
+        }
+
+        function drop() {
+            if (!running || paused) return;
+
+            if (
+                !collision(
+                    piece.shape,
+                    piece.x,
+                    piece.y + 1
+                )
+            ) {
+                piece.y++;
+            } else {
+                savePiece();
+                ArcadeAudio.effect("lock");
+
+                checkLines();
+                piece = newPiece();
+
+                if (
+                    collision(
+                        piece.shape,
+                        piece.x,
+                        piece.y
+                    )
+                ) {
+                    gameOver();
+                    return;
+                }
+            }
+
+            draw();
+        }
+
+        function hardDrop() {
+            if (!running || paused) return;
+
+            while (
+                !collision(
+                    piece.shape,
+                    piece.x,
+                    piece.y + 1
+                )
+            ) {
+                piece.y++;
+            }
+
+            ArcadeAudio.effect("drop");
+            drop();
+        }
+
+        function startGame() {
+            ArcadeAudio.unlock();
+
+            clearInterval(timer);
+            createBoard();
+
+            score = 0;
+            lines = 0;
+
+            running = true;
+            paused = false;
+
+            piece = newPiece();
+
+            document.getElementById("score").textContent = "0";
+            document.getElementById("lines").textContent = "0";
+            document.getElementById("message").textContent =
+                "Gra trwa!";
+
+            ArcadeAudio.setPlaying(true);
+            ArcadeAudio.effect("start");
+
+            draw();
+            timer = setInterval(drop, 500);
+        }
+
+        function pauseGame() {
+            if (!running) return;
+
+            paused = !paused;
+
+            ArcadeAudio.setPlaying(!paused);
+            ArcadeAudio.effect("pause");
+
+            document.getElementById("message").textContent =
+                paused ? "Pauza" : "Gra trwa!";
+        }
+
+        function gameOver() {
+            running = false;
+
+            clearInterval(timer);
+
+            ArcadeAudio.setPlaying(false);
+            ArcadeAudio.effect("over");
+
+            document.getElementById("message").textContent =
+                "Koniec gry! Twój wynik: " + score;
+        }
+
+        async function fullScreen() {
+            const game = document.getElementById("game");
+
+            try {
+                if (document.fullscreenElement) {
+                    await document.exitFullscreen();
+                } else {
+                    await game.requestFullscreen();
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        document.getElementById("start-btn")
+            .addEventListener("click", startGame);
+
+        document.getElementById("pause-btn")
+            .addEventListener("click", pauseGame);
+
+        document.getElementById("fullscreen-btn")
+            .addEventListener("click", fullScreen);
+
+        document.getElementById("left-btn")
+            .addEventListener("click", () => move(-1));
+
+        document.getElementById("right-btn")
+            .addEventListener("click", () => move(1));
+
+        document.getElementById("rotate-btn")
+            .addEventListener("click", rotate);
+
+        document.getElementById("down-btn")
+            .addEventListener("click", drop);
+
+        document.getElementById("drop-btn")
+            .addEventListener("click", hardDrop);
+
+        document.addEventListener("keydown", event => {
+            if (
+                ["ArrowLeft", "ArrowRight", "ArrowUp",
+                 "ArrowDown", " "].includes(event.key)
+            ) {
+                event.preventDefault();
+            }
+
+            if (event.key === "ArrowLeft") move(-1);
+            if (event.key === "ArrowRight") move(1);
+
+            if (event.key === "ArrowUp" && !event.repeat) {
+                rotate();
+            }
+
+            if (event.key === "ArrowDown") drop();
+
+            if (event.key === " " && !event.repeat) {
+                hardDrop();
+            }
+
+            if (
+                event.key.toLowerCase() === "p" &&
+                !event.repeat
+            ) {
+                pauseGame();
+            }
+        });
+
+        createBoard();
+        draw();
+    </script>
+</body>
+</html>

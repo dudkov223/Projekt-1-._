@@ -5,18 +5,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Snake World — Arcade Edition</title>
+
     <link rel="stylesheet" href="styl.css">
+
+    <script src="audio.js" defer></script>
     <script src="script.js" defer></script>
 </head>
-<body>
 
+<body>
     <header class="topbar">
         <div class="brand">
-            <span class="brand-icon" aria-hidden="true">🐍</span>
+            <span class="brand-icon">🐍</span>
             <div>
-                <p class="eyebrow">
-                    ARCADE EDITION <span class="pulse"></span>
-                </p>
+                <p class="eyebrow">ARCADE EDITION <span class="pulse"></span></p>
                 <h1>SNAKE <span>WORLD</span></h1>
                 <p class="subtitle" data-i18n="subtitle">
                     Klasyczna gra w nowym wydaniu
@@ -24,7 +25,7 @@
             </div>
         </div>
 
-        <a class="home-link" href="index.html" data-i18n="backMenu">
+        <a href="index.html" class="home-link" data-i18n="backMenu">
             ← Menu główne
         </a>
 
@@ -60,12 +61,15 @@
         <section class="game-section" id="game-section">
 
             <div class="fullscreen-toolbar">
-                <button
-                    id="fullscreen-btn"
-                    class="fullscreen-btn"
-                    type="button"
-                    aria-pressed="false"
-                >
+                <button class="fullscreen-btn" id="sound-btn" type="button">
+                    🔊 Dźwięk WŁ.
+                </button>
+
+                <button class="fullscreen-btn" id="music-btn" type="button">
+                    🎵 Muzyka WŁ.
+                </button>
+
+                <button class="fullscreen-btn" id="fullscreen-btn" type="button">
                     ⛶ Pełny ekran
                 </button>
             </div>
@@ -79,7 +83,7 @@
                 </div>
 
                 <div class="map-timer">
-                    <span id="next-map-label" data-i18n="nextMap">
+                    <span data-i18n="nextMap" id="next-map-label">
                         Nowa mapa za
                     </span>
                     <strong>
@@ -99,8 +103,11 @@
 
                 <div class="overlay" id="overlay">
                     <div class="overlay-card">
-                        <div class="emoji" aria-hidden="true">🐍</div>
-                        <p class="eyebrow" data-i18n="welcome">SNAKE WORLD</p>
+                        <div class="emoji">🐍</div>
+
+                        <p class="eyebrow" data-i18n="welcome">
+                            SNAKE WORLD
+                        </p>
 
                         <h2 id="overlay-title">Gotowy do gry?</h2>
                         <p id="overlay-desc">
@@ -141,31 +148,31 @@
                     </div>
                 </div>
 
-                <div id="map-banner" class="map-banner" aria-live="polite"></div>
+                <div id="map-banner" class="map-banner"></div>
                 <div id="score-float" class="score-float">+10</div>
 
                 <div
                     id="start-countdown"
                     class="start-countdown"
                     aria-live="assertive"
-                    aria-atomic="true"
                     hidden
                 ></div>
             </div>
 
-            <p id="message" class="message" aria-live="polite">
+            <p class="message" id="message">
                 Sterowanie: WASD lub strzałki, spacja — start / pauza.
             </p>
 
-            <p id="difficulty-hint" class="difficulty-hint"></p>
-
+            <p class="difficulty-hint" id="difficulty-hint"></p>
         </section>
 
         <aside class="sidebar">
-
             <div class="card score-card">
-                <p class="section-title" data-i18n="scoreLabel">TWÓJ WYNIK</p>
-                <strong id="score" class="score">0</strong>
+                <p class="section-title" data-i18n="scoreLabel">
+                    TWÓJ WYNIK
+                </p>
+
+                <strong class="score" id="score">0</strong>
 
                 <div class="stat">
                     <span data-i18n="bestLabel">🏆 Rekord</span>
@@ -185,14 +192,20 @@
 
             <div class="card options-card">
                 <div class="card-heading">
-                    <h2 data-i18n="optionsTitle">⚙️ Ustawienia gry</h2>
-                    <span class="small-tag" data-i18n="personalize">DOPASUJ</span>
+                    <h2 data-i18n="optionsTitle">
+                        ⚙️ Ustawienia gry
+                    </h2>
+                    <span class="small-tag" data-i18n="personalize">
+                        DOPASUJ
+                    </span>
                 </div>
 
                 <label class="switch-row" for="opt-maps">
                     <span>
                         <strong data-i18n="mapsOption">Zmiana map</strong>
-                        <small data-i18n="mapsDesc">Zmiana świata co 20/8 sekund</small>
+                        <small data-i18n="mapsDesc">
+                            Nowy świat co 20 / 8 sekund
+                        </small>
                     </span>
                     <input id="opt-maps" type="checkbox" checked>
                 </label>
@@ -200,7 +213,9 @@
                 <label class="switch-row" for="opt-obstacles">
                     <span>
                         <strong data-i18n="obstaclesOption">Przeszkody</strong>
-                        <small data-i18n="obstaclesDesc">Bloki na planszy</small>
+                        <small data-i18n="obstaclesDesc">
+                            Bloki do omijania
+                        </small>
                     </span>
                     <input id="opt-obstacles" type="checkbox" checked>
                 </label>
@@ -208,29 +223,35 @@
                 <label class="switch-row" for="opt-acceleration">
                     <span>
                         <strong data-i18n="speedOption">Przyspieszanie</strong>
-                        <small data-i18n="speedDesc">Wąż robi się coraz szybszy</small>
+                        <small data-i18n="speedDesc">
+                            Wąż przyspiesza po owocach
+                        </small>
                     </span>
                     <input id="opt-acceleration" type="checkbox" checked>
                 </label>
 
                 <label class="switch-row" for="opt-grid">
                     <span>
-                        <strong data-i18n="gridOption">Siatka</strong>
-                        <small data-i18n="gridDesc">Linie na planszy</small>
+                        <strong data-i18n="gridOption">Siatka planszy</strong>
+                        <small data-i18n="gridDesc">
+                            Linie dzielące pola
+                        </small>
                     </span>
                     <input id="opt-grid" type="checkbox" checked>
                 </label>
 
                 <label class="switch-row" for="opt-effects">
                     <span>
-                        <strong data-i18n="effectsOption">Efekty</strong>
-                        <small data-i18n="effectsDesc">Poświata i animacje</small>
+                        <strong data-i18n="effectsOption">Efekty graficzne</strong>
+                        <small data-i18n="effectsDesc">
+                            Poświata i animacje
+                        </small>
                     </span>
                     <input id="opt-effects" type="checkbox" checked>
                 </label>
 
                 <p class="option-note" id="option-note" data-i18n="optionsNote">
-                    Zasady zmienisz przed rozpoczęciem gry.
+                    Zasady zmienisz przed grą.
                 </p>
             </div>
 
@@ -238,7 +259,7 @@
                 <div class="card-heading">
                     <h2 data-i18n="rankingTitle">🏆 TOP 10</h2>
 
-                    <select id="ranking-filter" aria-label="Filtr rankingu">
+                    <select id="ranking-filter">
                         <option value="normal" data-i18n="normalMode">
                             Normalny
                         </option>
@@ -256,16 +277,17 @@
 
                 <ol id="ranking-list" class="ranking-list"></ol>
                 <p id="ranking-empty" class="ranking-empty"></p>
+
                 <p class="ranking-note" data-i18n="rankingNote">
-                    Wyniki są zapisane tylko w tej przeglądarce.
+                    Wyniki są zapisane lokalnie.
                 </p>
             </div>
 
             <div class="card buttons">
                 <button
                     id="start-btn"
-                    type="button"
                     class="primary-btn"
+                    type="button"
                     data-i18n="newGame"
                 >
                     ↻ Nowa gra
@@ -280,12 +302,11 @@
                 <h2 data-i18n="controlsLabel">STEROWANIE</h2>
 
                 <div class="arrows">
-                    <button data-dir="up" type="button" aria-label="Góra">↑</button>
-
+                    <button data-dir="up" type="button">↑</button>
                     <div>
-                        <button data-dir="left" type="button" aria-label="Lewo">←</button>
-                        <button data-dir="down" type="button" aria-label="Dół">↓</button>
-                        <button data-dir="right" type="button" aria-label="Prawo">→</button>
+                        <button data-dir="left" type="button">←</button>
+                        <button data-dir="down" type="button">↓</button>
+                        <button data-dir="right" type="button">→</button>
                     </div>
                 </div>
 
@@ -293,13 +314,12 @@
                     WASD / strzałki — ruch, spacja — start / pauza
                 </p>
             </div>
-
         </aside>
+
     </main>
 
     <footer class="footer">
-        SNAKE WORLD <span>•</span> ARCADE EDITION
+        SNAKE WORLD <span>•</span> ARCADE
     </footer>
-
 </body>
 </html>

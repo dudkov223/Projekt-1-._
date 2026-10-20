@@ -4,143 +4,250 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arcade Hub — Snake World</title>
-    <meta name="description" content="Arcade Hub — zagraj w Snake World.">
+    <title>Arcade Hub — Menu główne</title>
+
     <link rel="stylesheet" href="menu.css">
     <script src="menu.js" defer></script>
 </head>
+
 <body>
-    <div class="bg-glow bg-glow-one" aria-hidden="true"></div>
-    <div class="bg-glow bg-glow-two" aria-hidden="true"></div>
+    <div class="bg-glow bg-glow-one"></div>
+    <div class="bg-glow bg-glow-two"></div>
+
     <header class="topbar">
-        <a class="logo" href="index.html" aria-label="Arcade Hub — strona główna">
-            <span class="logo-icon" aria-hidden="true">▦</span>
-            <span>ARCADE<span class="logo-color">HUB</span></span>
+        <a class="logo" href="index.html">
+            <span class="logo-icon">▦</span>
+            <span>
+                ARCADE<span class="logo-color">HUB</span>
+            </span>
         </a>
-        <nav class="nav" aria-label="Nawigacja główna">
-            <a href="#gry" data-i18n="games">Gry</a>
+
+        <nav class="nav">
+            <a href="#gry">Gry</a>
+            <a href="#o-projekcie">O projekcie</a>
         </nav>
-        <div class="language-picker">
-            <label for="language-select" data-i18n="languageLabel">
-                Język
-            </label>
-            <select id="language-select">
-                <option value="pl">Polski</option>
-                <option value="en">English</option>
-            </select>
-        </div>
+
         <span class="top-label">
             <span class="online-dot"></span>
-            <span data-i18n="collection">1 GRA W KOLEKCJI</span>
+            3 GRY W KOLEKCJI
         </span>
     </header>
+
     <main>
-        <section class="hero" aria-labelledby="hero-title">
+        <section class="hero">
             <div class="hero-text">
                 <p class="eyebrow">
                     <span class="tiny-square"></span>
-                    <span data-i18n="welcome">TWOJE CENTRUM GIER</span>
+                    TWOJE CENTRUM GIER
                 </p>
-                <h1 id="hero-title">
-                    <span class="hero-first-line" data-i18n="heroFirst">
-                        JEDNA GRA.
-                    </span>
+
+                <h1>
+                    JEDNO MENU.
                     <br>
-                    <span data-i18n="heroSecond">SNAKE WORLD.</span>
+                    <span>WIELE GIER.</span>
                 </h1>
+
+                <p class="hero-description">
+                    Wybierz grę i rozpocznij zabawę.
+                    Snake World i Tetris są już dostępne,
+                    a Pong dołączy w kolejnym projekcie.
+                </p>
+
                 <div class="hero-actions">
                     <a class="button button-primary" href="#gry">
-                        <span data-i18n="goToGame">PRZEJDŹ DO GRY</span>
-                        <span aria-hidden="true">↗</span>
+                        WYBIERZ GRĘ ↗
                     </a>
+
                     <a class="button button-outline" href="snake.html">
-                        <span aria-hidden="true">▶</span>
-                        <span data-i18n="playSnake">ZAGRAJ W SNAKE</span>
+                        ▶ ZAGRAJ W SNAKE
                     </a>
                 </div>
+
                 <div class="hero-stats">
                     <div>
-                        <strong>01</strong>
-                        <span data-i18n="availableGame">GRA DOSTĘPNA</span>
+                        <strong>02</strong>
+                        <span>GRY DOSTĘPNE</span>
                     </div>
-                    <div>
-                        <strong>TOP</strong>
-                        <span data-i18n="ranking">RANKING W GRZE</span>
-                    </div>
+
                     <div>
                         <strong>∞</strong>
-                        <span data-i18n="fun">ZABAWA</span>
+                        <span>MOŻLIWOŚCI</span>
                     </div>
                 </div>
             </div>
-            <div class="preview" aria-hidden="true">
+
+            <div class="preview">
                 <div class="preview-header">
                     <span>
                         <i></i>
                         <i></i>
                         <i></i>
                     </span>
-                    <span data-i18n="preview">PODGLĄD // SNAKE WORLD</span>
+
+                    <span>LIVE PREVIEW // SNAKE WORLD</span>
                 </div>
+
                 <div class="preview-board">
                     <span class="snake-piece p1"></span>
                     <span class="snake-piece p2"></span>
                     <span class="snake-piece p3"></span>
                     <span class="snake-piece p4"></span>
                     <span class="snake-piece p5"></span>
+
                     <span class="preview-fruit"></span>
+
                     <span class="preview-block b1"></span>
                     <span class="preview-block b2"></span>
                     <span class="preview-block b3"></span>
                 </div>
+
                 <div class="preview-footer">
-                    <span></span>
-                    <span data-i18n="previewScore">WYNIK: 0240</span>
+                    <span>● SYSTEM ONLINE</span>
+                    <span>SCORE: 0240</span>
                 </div>
             </div>
         </section>
-        <section id="gry" class="library" aria-labelledby="games-title">
+
+        <section id="gry" class="library">
+
             <div class="section-top">
                 <div>
-                    <p class="eyebrow" data-i18n="library">
-                        BIBLIOTEKA GIER
+                    <p class="eyebrow">// BIBLIOTEKA GIER</p>
+
+                    <h2>WYBIERZ SWOJĄ GRĘ</h2>
+
+                    <p class="section-description">
+                        Wybierz Snake World, Tetris 
                     </p>
-                    <h2 id="games-title" data-i18n="availableTitle">
-                        DOSTĘPNA GRA
-                    </h2>
                 </div>
-                <span class="results" data-i18n="oneGame">1 gra</span>
+
+                <span class="results" id="visible-count">
+                    2 gry
+                </span>
             </div>
-            <div class="games-grid single-game">
-                <article class="game-card snake-card">
-                    <div class="card-art snake-art" aria-hidden="true">
+
+            <div class="filters">
+                <button
+                    class="filter-btn active"
+                    type="button"
+                    data-filter="all"
+                    aria-pressed="true"
+                >
+                    Wszystkie <span>02</span>
+                </button>
+
+                <button
+                    class="filter-btn"
+                    type="button"
+                    data-filter="available"
+                    aria-pressed="false"
+                >
+                    Dostępne <span>02</span>
+                </button>
+
+                <button
+                    class="filter-btn"
+                    type="button"
+                    data-filter="soon"
+                    aria-pressed="false"
+                >
+                    Wkrótce <span>01</span>
+                </button>
+            </div>
+
+            <div class="games-grid">
+
+                <article
+                    class="game-card snake-card"
+                    data-status="available"
+                >
+                    <div class="card-art snake-art">
                         <span class="art-grid"></span>
                         <span class="art-emoji">🐍</span>
                         <span class="art-word">SNAKE</span>
                     </div>
+
                     <div class="card-body">
                         <span class="status ready">
                             <span></span>
-                            <span data-i18n="available">DOSTĘPNA</span>
+                            DOSTĘPNA
                         </span>
+
                         <h3>Snake World</h3>
-                        <p data-i18n="snakeDescription">
+
+                        <p>
                             Klasyczny Snake z czterema mapami,
-                            rankingiem TOP 10, poziomami trudności,
-                            odliczaniem i własnymi ustawieniami.
+                            poziomami trudności, rankingiem
+                            i własnymi ustawieniami.
                         </p>
+
                         <div class="tags">
                             <span>ARCADE</span>
-                            <span data-i18n="onePlayer">1 GRACZ</span>
+                            <span>1 GRACZ</span>
+                            <span>GOTOWA</span>
                         </div>
+
                         <a class="play-link" href="snake.html">
-                            <span data-i18n="playNow">ZAGRAJ TERAZ</span>
-                            <span aria-hidden="true">↗</span>
+                            ZAGRAJ TERAZ
+                            <span>↗</span>
                         </a>
                     </div>
                 </article>
+
+
+
+                <article
+                    class="game-card tetris-card"
+                    data-status="available"
+                >
+                    <div class="card-art tetris-art">
+                        <div class="tetris-shape">
+                            <i></i>
+                            <i></i>
+                            <i></i>
+                            <i></i>
+                        </div>
+                        <span class="art-word">TETRIS</span>
+                    </div>
+
+                    <div class="card-body">
+                        <span class="status ready">
+                            <span></span>
+                            DOSTĘPNA
+                        </span>
+
+                        <h3>Tetris Classic</h3>
+
+                        <p>
+                            Układaj spadające klocki,
+                            usuwaj pełne linie i zdobywaj
+                            coraz więcej punktów.
+                        </p>
+
+                        <div class="tags">
+                            <span>PUZZLE</span>
+                            <span>1 GRACZ</span>
+                            <span>GOTOWA</span>
+                        </div>
+
+                        <a class="play-link" href="tetris.html">
+                            ZAGRAJ TERAZ
+                            <span>↗</span>
+                        </a>
+                    </div>
+                </article>
+
             </div>
         </section>
+            <span class="about-icon">
+                &lt;/&gt;
+            </span>
+        </section>
     </main>
+
+    <footer class="footer">
+        ARCADE<span>HUB</span>
+        <span class="footer-dot">•</span>
+    </footer>
 </body>
 </html>

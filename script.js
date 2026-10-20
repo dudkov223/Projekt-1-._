@@ -1,9 +1,12 @@
-"use strict";
+
 const $ = id => document.getElementById(id);
+
 const canvas = $("board");
 const ctx = canvas.getContext("2d");
+
 const CELL = 30;
 const COUNT = 20;
+
 const translations = {
     pl: {
         subtitle: "Klasyczna gra w nowym wydaniu",
@@ -80,6 +83,7 @@ const translations = {
         hardHint: "Trudny: 95 ms/ruch • mapa co 8 s • dużo przeszkód",
         customHint: "⚙️ Grasz na własnych zasadach — osobny ranking"
     },
+
     en: {
         subtitle: "Classic game, fresh look",
         backMenu: "← Main menu",
@@ -156,6 +160,7 @@ const translations = {
         customHint: "⚙️ Custom rules — separate leaderboard"
     }
 };
+
 const maps = [
     {
         pl: "NEON CITY",
@@ -218,6 +223,7 @@ const maps = [
         amount: 13
     }
 ];
+
 const read = (key, fallback) => {
     try {
         const value = localStorage.getItem(key);
@@ -226,16 +232,19 @@ const read = (key, fallback) => {
         return fallback;
     }
 };
+
 const store = (key, value) => {
     try {
         localStorage.setItem(key, value);
     } catch {
     }
 };
+
 let language = read("snake-language", "pl") === "en" ? "en" : "pl";
 let theme = read("snake-theme", "dark") === "light" ? "light" : "dark";
 let graphics = read("snake-graphics", "modern") === "retro" ? "retro" : "modern";
 let difficulty = read("snake-difficulty", "normal") === "hard" ? "hard" : "normal";
+
 const optionIds = {
     maps: "opt-maps",
     obstacles: "opt-obstacles",
@@ -243,63 +252,78 @@ const optionIds = {
     grid: "opt-grid",
     effects: "opt-effects"
 };
+
 const options = Object.fromEntries(
     Object.keys(optionIds).map(key => [
         key,
         read("snake-opt-" + key, "true") === "true"
     ])
 );
+
 const t = key => translations[language][key] || key;
+
 const initialSnake = () => [
     { x: 10, y: 10 },
     { x: 9, y: 10 },
     { x: 8, y: 10 }
 ];
+
 let snake = initialSnake();
 let previousSnake = initialSnake();
+
 let direction = { x: 1, y: 0 };
 let nextDirection = { x: 1, y: 0 };
 let turned = false;
+
 let food = null;
 let obstacles = [];
 let score = 0;
 let eaten = 0;
 let mapIndex = 0;
 let seconds = 20;
+
 let playing = false;
 let paused = false;
 let moveTimer = null;
 let mapTimer = null;
 let particles = [];
+
 let moveAt = performance.now();
 let prevFrame = 0;
 let best = 0;
 let scoreSaved = false;
 let resultCategory = "normal";
+
 let messageKey = "introMessage";
+
 let overlayState = {
     title: "readyTitle",
     description: "readyDescription",
     button: "startButton",
     showScore: false
 };
+
 let countdownActive = false;
 let countdownNumber = 3;
 let countdownTimer = null;
+
 function category() {
     const custom =
         !options.maps ||
         !options.obstacles ||
         !options.acceleration;
+
     return custom
         ? (difficulty === "hard" ? "customHard" : "customNormal")
         : difficulty;
 }
+
 function readRanking() {
     try {
         const data = JSON.parse(
             read("snake-leaderboard-v1", "{}")
         );
+
         const clean = key =>
             Array.isArray(data?.[key])
                 ? data[key].filter(item =>
@@ -308,6 +332,7 @@ function readRanking() {
                     Number.isFinite(Number(item.score))
                 ).slice(0, 10)
                 : [];
+
         return {
             normal: clean("normal"),
             hard: clean("hard"),
@@ -323,6 +348,7 @@ function readRanking() {
         };
     }
 }
+
 function getBest(key) {
     return Math.max(
         0,
@@ -331,27 +357,35 @@ function getBest(key) {
         )
     );
 }
+
 function renderRanking() {
     const list = $("ranking-list");
     const rows = readRanking()[$("ranking-filter").value];
+
     list.replaceChildren();
+
     $("ranking-empty").textContent =
         rows.length ? "" : t("rankingEmpty");
+
     rows.forEach((entry, i) => {
         const li = document.createElement("li");
         const pos = document.createElement("span");
         const name = document.createElement("span");
         const pts = document.createElement("strong");
+
         pos.className = "ranking-position";
         name.className = "ranking-player";
         pts.className = "ranking-points";
+
         pos.textContent = (i + 1) + ".";
         name.textContent = entry.name.slice(0, 16);
         pts.textContent = String(Number(entry.score));
+
         li.append(pos, name, pts);
         list.append(li);
     });
 }
+
 function saveScore() {
     if (
         playing ||
@@ -361,47 +395,64 @@ function saveScore() {
     ) {
         return;
     }
+
     const name =
         $("player-name").value.trim().slice(0, 16) ||
         t("defaultPlayer");
+
     store("snake-player-name", name);
+
     const table = readRanking();
+
     table[resultCategory].push({
         name,
         score,
         time: Date.now()
     });
+
     table[resultCategory].sort(
         (a, b) => b.score - a.score || a.time - b.time
     );
+
     table[resultCategory] = table[resultCategory].slice(0, 10);
+
     store("snake-leaderboard-v1", JSON.stringify(table));
+
     scoreSaved = true;
     $("save-score-btn").disabled = true;
     $("save-score-feedback").textContent = t("scoreSaved");
     $("ranking-filter").value = resultCategory;
+
     best = Math.max(best, getBest(resultCategory));
+
     updateStats();
     renderRanking();
 }
+
 function mapSeconds() {
     return difficulty === "hard" ? 8 : 20;
 }
+
 function speed() {
     if (!options.acceleration) {
         return difficulty === "hard" ? 95 : 160;
     }
+
     return difficulty === "hard"
         ? Math.max(43, 95 - Math.floor(eaten / 2) * 6)
         : Math.max(85, 160 - Math.floor(eaten / 3) * 10);
 }
+
 function setMapColors() {
     const map = maps[mapIndex];
+
     $("map-name").textContent = map[language];
+
     document.documentElement.style.setProperty(
         "--accent",
         graphics === "retro" ? "#9cc88b" : map.accent
     );
+
     document.documentElement.style.setProperty(
         "--accent-ink",
         graphics === "retro"
@@ -409,40 +460,52 @@ function setMapColors() {
             : (theme === "light" ? map.ink : map.accent)
     );
 }
+
 function updateMapInfo() {
     $("next-map-label").textContent =
         t(options.maps ? "nextMap" : "fixedMap");
+
     $("map-time").textContent =
         options.maps ? seconds : "—";
+
     $("map-unit").textContent =
         options.maps ? "s" : "";
 }
+
 function updateStats() {
     $("score").textContent = score;
     $("best").textContent = best;
     $("eaten").textContent = eaten;
+
     $("speed").textContent = options.acceleration
         ? 1 + Math.floor(eaten / (difficulty === "hard" ? 2 : 3))
         : 1;
+
     updateMapInfo();
 }
+
 function updateHint() {
     $("difficulty-hint").textContent =
         t(difficulty === "hard" ? "hardHint" : "normalHint") +
         (category().startsWith("custom")
             ? "  ·  " + t("customHint")
             : "");
+
     $("option-note").textContent = t("optionsNote");
 }
+
 function renderOverlay() {
     $("overlay-title").textContent = t(overlayState.title);
+
     $("overlay-desc").textContent =
         t(overlayState.description) +
         (overlayState.showScore
             ? " " + t("scoreSuffix") + " " + score + " " + t("points")
             : "");
+
     $("overlay-btn").textContent = t(overlayState.button);
 }
+
 function showOverlay(title, description, button, showScore = false) {
     overlayState = {
         title,
@@ -450,23 +513,30 @@ function showOverlay(title, description, button, showScore = false) {
         button,
         showScore
     };
+
     renderOverlay();
     $("overlay").hidden = false;
 }
+
 function setMessage(key) {
     messageKey = key;
     $("message").textContent = t(key);
 }
+
 function updateLanguage() {
     document.documentElement.lang = language;
+
     document.querySelectorAll("[data-i18n]").forEach(element => {
         element.textContent = t(element.dataset.i18n);
     });
+
     $("player-name").placeholder = t("playerPlaceholder");
+
     $("board").setAttribute(
         "aria-label",
         language === "pl" ? "Plansza gry Snake" : "Snake game board"
     );
+
     const labels = {
         pl: {
             up: "Góra",
@@ -481,6 +551,7 @@ function updateLanguage() {
             down: "Down"
         }
     };
+
     document.querySelectorAll("[data-dir]").forEach(button => {
         button.setAttribute(
             "aria-label",
@@ -511,6 +582,8 @@ function updateLanguage() {
     updateHint();
     renderOverlay();
     renderRanking();
+
+    ArcadeAudio.updateButtons();
 }
 
 function applyAppearance() {
@@ -632,6 +705,7 @@ function changeMap() {
     }
 
     setMessage("newWorldMessage");
+    ArcadeAudio.effect("map");
 }
 
 function stopTimers() {
@@ -673,6 +747,8 @@ function startCountdown() {
         if (!countdownActive) return;
 
         if (countdownNumber > 0) {
+            ArcadeAudio.effect("count");
+
             number.textContent = String(countdownNumber);
             number.classList.remove("go", "pop");
 
@@ -693,8 +769,11 @@ function startCountdown() {
                 number.classList.remove("go", "pop");
 
                 playing = true;
-                moveAt = performance.now() - speed();
 
+                ArcadeAudio.setPlaying(true);
+                ArcadeAudio.effect("start");
+
+                moveAt = performance.now() - speed();
                 $("pause-btn").disabled = false;
 
                 setMessage("startMessage");
@@ -708,6 +787,9 @@ function startCountdown() {
 
 function startGame() {
     if (countdownActive) return;
+
+    ArcadeAudio.unlock();
+    ArcadeAudio.setPlaying(false);
 
     clearTimeout(countdownTimer);
     stopTimers();
@@ -759,6 +841,12 @@ function startGame() {
 }
 
 function endGame(title, description) {
+    ArcadeAudio.setPlaying(false);
+
+    ArcadeAudio.effect(
+        title === "winTitle" ? "win" : "over"
+    );
+
     playing = false;
     paused = false;
 
@@ -837,13 +925,18 @@ function moveSnake() {
         score += 10;
         eaten++;
 
+        ArcadeAudio.effect("eat");
+
         if (options.effects) {
             makeParticles(head.x, head.y);
 
             const fl = $("score-float");
 
-            fl.style.left = ((head.x + .5) / COUNT * 100) + "%";
-            fl.style.top = ((head.y + .5) / COUNT * 100) + "%";
+            fl.style.left =
+                ((head.x + .5) / COUNT * 100) + "%";
+
+            fl.style.top =
+                ((head.y + .5) / COUNT * 100) + "%";
 
             animate(fl, "show");
             animate($("score"), "pop");
@@ -865,6 +958,7 @@ function moveSnake() {
             moveTimer = setInterval(moveSnake, speed());
 
             setMessage("fasterMessage");
+            ArcadeAudio.effect("boost");
         }
     } else {
         snake.pop();
@@ -877,6 +971,9 @@ function togglePause() {
     if (!playing) return;
 
     paused = !paused;
+
+    ArcadeAudio.effect("pause");
+    ArcadeAudio.setPlaying(!paused);
 
     if (paused) {
         stopTimers();
@@ -1001,6 +1098,7 @@ function drawModern(time, dt) {
     obstacles.forEach(o => {
         ctx.fillStyle = map.block;
         ctx.beginPath();
+
         ctx.roundRect(
             o.x * CELL + 4,
             o.y * CELL + 4,
@@ -1008,6 +1106,7 @@ function drawModern(time, dt) {
             22,
             6
         );
+
         ctx.fill();
     });
 
@@ -1023,6 +1122,7 @@ function drawModern(time, dt) {
         }
 
         ctx.beginPath();
+
         ctx.arc(
             x,
             y,
@@ -1032,6 +1132,7 @@ function drawModern(time, dt) {
             0,
             Math.PI * 2
         );
+
         ctx.fill();
         ctx.shadowBlur = 0;
 
@@ -1145,10 +1246,7 @@ Object.entries(optionIds).forEach(([name, id]) => {
     el.addEventListener("change", () => {
         options[name] = el.checked;
 
-        store(
-            "snake-opt-" + name,
-            String(el.checked)
-        );
+        store("snake-opt-" + name, String(el.checked));
 
         if (!playing) {
             best = getBest(category());
@@ -1172,23 +1270,19 @@ Object.entries(optionIds).forEach(([name, id]) => {
 
 $("theme-select").addEventListener("change", e => {
     theme = e.target.value;
-
     store("snake-theme", theme);
     applyAppearance();
 });
 
 $("graphics-select").addEventListener("change", e => {
     graphics = e.target.value;
-
     store("snake-graphics", graphics);
     applyAppearance();
 });
 
 $("language-select").addEventListener("change", e => {
     language = e.target.value;
-
     store("snake-language", language);
-
     updateLanguage();
 });
 
@@ -1295,61 +1389,56 @@ document.querySelectorAll("[data-dir]").forEach(el => {
     });
 });
 
+const fullscreenButton = $("fullscreen-btn");
+const fullscreenArea = $("game-section");
+
+function updateFullscreenButton() {
+    const active =
+        document.fullscreenElement === fullscreenArea;
+
+    fullscreenButton.textContent =
+        language === "en"
+            ? (active ? "⤢ Exit fullscreen" : "⛶ Fullscreen")
+            : (active ? "⤢ Wyłącz pełny ekran" : "⛶ Pełny ekran");
+
+    fullscreenButton.setAttribute(
+        "aria-pressed",
+        String(active)
+    );
+}
+
+fullscreenButton.addEventListener("click", async () => {
+    try {
+        if (document.fullscreenElement) {
+            await document.exitFullscreen();
+        } else {
+            await fullscreenArea.requestFullscreen();
+        }
+    } catch (error) {
+        console.error("Fullscreen error:", error);
+    }
+
+    updateFullscreenButton();
+});
+
+document.addEventListener(
+    "fullscreenchange",
+    updateFullscreenButton
+);
+
+$("language-select").addEventListener(
+    "change",
+    updateFullscreenButton
+);
+
+ArcadeAudio.init("snake");
+
 seconds = mapSeconds();
 best = getBest(category());
 
 applyAppearance();
 updateLanguage();
 updateStats();
+updateFullscreenButton();
 
 requestAnimationFrame(draw);
-
-const snakeFullscreenButton =
-    document.getElementById("fullscreen-btn");
-
-const snakeFullscreenSection =
-    document.getElementById("game-section");
-
-function updateSnakeFullscreenButton() {
-    const active =
-        document.fullscreenElement === snakeFullscreenSection;
-
-    snakeFullscreenButton.textContent =
-        language === "en"
-            ? (active ? "Exit fullscreen" : " Fullscreen")
-            : (active ? "Wyłącz pełny ekran" : " Pełny ekran");
-
-    snakeFullscreenButton.setAttribute(
-        "aria-pressed",
-        String(active)
-    );
-}
-
-snakeFullscreenButton.addEventListener("click", async () => {
-    try {
-        if (document.fullscreenElement) {
-            await document.exitFullscreen();
-        } else {
-            await snakeFullscreenSection.requestFullscreen();
-        }
-    } catch (error) {
-        console.error(
-            "Nie udało się włączyć pełnego ekranu / Fullscreen failed:",
-            error
-        );
-    }
-    snakeFullscreenButton.blur();
-    updateSnakeFullscreenButton();
-});
-
-document.addEventListener(
-    "fullscreenchange",
-    updateSnakeFullscreenButton
-);
-
-document.getElementById("language-select").addEventListener(
-    "change",
-    updateSnakeFullscreenButton
-);
-
-updateSnakeFullscreenButton();
