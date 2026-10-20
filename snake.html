@@ -1,0 +1,305 @@
+
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Snake World — Arcade Edition</title>
+    <link rel="stylesheet" href="styl.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+
+    <header class="topbar">
+        <div class="brand">
+            <span class="brand-icon" aria-hidden="true">🐍</span>
+            <div>
+                <p class="eyebrow">
+                    ARCADE EDITION <span class="pulse"></span>
+                </p>
+                <h1>SNAKE <span>WORLD</span></h1>
+                <p class="subtitle" data-i18n="subtitle">
+                    Klasyczna gra w nowym wydaniu
+                </p>
+            </div>
+        </div>
+
+        <a class="home-link" href="index.html" data-i18n="backMenu">
+            ← Menu główne
+        </a>
+
+        <div class="settings">
+            <label for="theme-select" data-i18n="themeLabel">Motyw</label>
+            <select id="theme-select">
+                <option value="dark" data-i18n="darkTheme">🌙 Ciemny</option>
+                <option value="light" data-i18n="lightTheme">☀️ Jasny</option>
+            </select>
+
+            <label for="graphics-select" data-i18n="graphicsLabel">Grafika</label>
+            <select id="graphics-select">
+                <option value="modern" data-i18n="modernGraphics">✨ Nowoczesna</option>
+                <option value="retro" data-i18n="retroGraphics">▣ Retro</option>
+            </select>
+
+            <label for="difficulty-select" data-i18n="difficultyLabel">Trudność</label>
+            <select id="difficulty-select">
+                <option value="normal" data-i18n="normalMode">Normalny</option>
+                <option value="hard" data-i18n="hardMode">Trudny ☠</option>
+            </select>
+
+            <label for="language-select" data-i18n="languageLabel">Język</label>
+            <select id="language-select">
+                <option value="pl">Polski</option>
+                <option value="en">English</option>
+            </select>
+        </div>
+    </header>
+
+    <main class="layout">
+
+        <section class="game-section" id="game-section">
+
+            <div class="fullscreen-toolbar">
+                <button
+                    id="fullscreen-btn"
+                    class="fullscreen-btn"
+                    type="button"
+                    aria-pressed="false"
+                >
+                    ⛶ Pełny ekran
+                </button>
+            </div>
+
+            <div class="map-info">
+                <div>
+                    <span class="mini-label" data-i18n="worldLabel">
+                        AKTUALNY ŚWIAT
+                    </span>
+                    <strong id="map-name">NEON CITY</strong>
+                </div>
+
+                <div class="map-timer">
+                    <span id="next-map-label" data-i18n="nextMap">
+                        Nowa mapa za
+                    </span>
+                    <strong>
+                        <span id="map-time">20</span>
+                        <span id="map-unit">s</span>
+                    </strong>
+                </div>
+            </div>
+
+            <div class="board-box" id="board-box">
+                <canvas
+                    id="board"
+                    width="600"
+                    height="600"
+                    aria-label="Plansza Snake"
+                ></canvas>
+
+                <div class="overlay" id="overlay">
+                    <div class="overlay-card">
+                        <div class="emoji" aria-hidden="true">🐍</div>
+                        <p class="eyebrow" data-i18n="welcome">SNAKE WORLD</p>
+
+                        <h2 id="overlay-title">Gotowy do gry?</h2>
+                        <p id="overlay-desc">
+                            Zbieraj owoce i unikaj przeszkód!
+                        </p>
+
+                        <button
+                            id="overlay-btn"
+                            type="button"
+                            class="primary-btn"
+                        >
+                            ▶ Rozpocznij
+                        </button>
+
+                        <div id="save-score-box" class="save-score-box" hidden>
+                            <label for="player-name" data-i18n="nameLabel">
+                                Nazwa gracza
+                            </label>
+
+                            <input
+                                id="player-name"
+                                type="text"
+                                maxlength="16"
+                                autocomplete="nickname"
+                                placeholder="Gracz"
+                            >
+
+                            <button
+                                id="save-score-btn"
+                                type="button"
+                                data-i18n="saveScore"
+                            >
+                                💾 Zapisz wynik
+                            </button>
+
+                            <p id="save-score-feedback" aria-live="polite"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="map-banner" class="map-banner" aria-live="polite"></div>
+                <div id="score-float" class="score-float">+10</div>
+
+                <div
+                    id="start-countdown"
+                    class="start-countdown"
+                    aria-live="assertive"
+                    aria-atomic="true"
+                    hidden
+                ></div>
+            </div>
+
+            <p id="message" class="message" aria-live="polite">
+                Sterowanie: WASD lub strzałki, spacja — start / pauza.
+            </p>
+
+            <p id="difficulty-hint" class="difficulty-hint"></p>
+
+        </section>
+
+        <aside class="sidebar">
+
+            <div class="card score-card">
+                <p class="section-title" data-i18n="scoreLabel">TWÓJ WYNIK</p>
+                <strong id="score" class="score">0</strong>
+
+                <div class="stat">
+                    <span data-i18n="bestLabel">🏆 Rekord</span>
+                    <strong id="best">0</strong>
+                </div>
+
+                <div class="stat">
+                    <span data-i18n="fruitsLabel">🍎 Owoce</span>
+                    <strong id="eaten">0</strong>
+                </div>
+
+                <div class="stat">
+                    <span data-i18n="levelLabel">⚡ Poziom szybkości</span>
+                    <strong id="speed">1</strong>
+                </div>
+            </div>
+
+            <div class="card options-card">
+                <div class="card-heading">
+                    <h2 data-i18n="optionsTitle">⚙️ Ustawienia gry</h2>
+                    <span class="small-tag" data-i18n="personalize">DOPASUJ</span>
+                </div>
+
+                <label class="switch-row" for="opt-maps">
+                    <span>
+                        <strong data-i18n="mapsOption">Zmiana map</strong>
+                        <small data-i18n="mapsDesc">Zmiana świata co 20/8 sekund</small>
+                    </span>
+                    <input id="opt-maps" type="checkbox" checked>
+                </label>
+
+                <label class="switch-row" for="opt-obstacles">
+                    <span>
+                        <strong data-i18n="obstaclesOption">Przeszkody</strong>
+                        <small data-i18n="obstaclesDesc">Bloki na planszy</small>
+                    </span>
+                    <input id="opt-obstacles" type="checkbox" checked>
+                </label>
+
+                <label class="switch-row" for="opt-acceleration">
+                    <span>
+                        <strong data-i18n="speedOption">Przyspieszanie</strong>
+                        <small data-i18n="speedDesc">Wąż robi się coraz szybszy</small>
+                    </span>
+                    <input id="opt-acceleration" type="checkbox" checked>
+                </label>
+
+                <label class="switch-row" for="opt-grid">
+                    <span>
+                        <strong data-i18n="gridOption">Siatka</strong>
+                        <small data-i18n="gridDesc">Linie na planszy</small>
+                    </span>
+                    <input id="opt-grid" type="checkbox" checked>
+                </label>
+
+                <label class="switch-row" for="opt-effects">
+                    <span>
+                        <strong data-i18n="effectsOption">Efekty</strong>
+                        <small data-i18n="effectsDesc">Poświata i animacje</small>
+                    </span>
+                    <input id="opt-effects" type="checkbox" checked>
+                </label>
+
+                <p class="option-note" id="option-note" data-i18n="optionsNote">
+                    Zasady zmienisz przed rozpoczęciem gry.
+                </p>
+            </div>
+
+            <div class="card ranking-card">
+                <div class="card-heading">
+                    <h2 data-i18n="rankingTitle">🏆 TOP 10</h2>
+
+                    <select id="ranking-filter" aria-label="Filtr rankingu">
+                        <option value="normal" data-i18n="normalMode">
+                            Normalny
+                        </option>
+                        <option value="hard" data-i18n="hardMode">
+                            Trudny ☠
+                        </option>
+                        <option value="customNormal" data-i18n="customNormal">
+                            Własny · Normalny
+                        </option>
+                        <option value="customHard" data-i18n="customHard">
+                            Własny · Trudny
+                        </option>
+                    </select>
+                </div>
+
+                <ol id="ranking-list" class="ranking-list"></ol>
+                <p id="ranking-empty" class="ranking-empty"></p>
+                <p class="ranking-note" data-i18n="rankingNote">
+                    Wyniki są zapisane tylko w tej przeglądarce.
+                </p>
+            </div>
+
+            <div class="card buttons">
+                <button
+                    id="start-btn"
+                    type="button"
+                    class="primary-btn"
+                    data-i18n="newGame"
+                >
+                    ↻ Nowa gra
+                </button>
+
+                <button id="pause-btn" type="button" disabled>
+                    Ⅱ Pauza
+                </button>
+            </div>
+
+            <div class="card controls-card">
+                <h2 data-i18n="controlsLabel">STEROWANIE</h2>
+
+                <div class="arrows">
+                    <button data-dir="up" type="button" aria-label="Góra">↑</button>
+
+                    <div>
+                        <button data-dir="left" type="button" aria-label="Lewo">←</button>
+                        <button data-dir="down" type="button" aria-label="Dół">↓</button>
+                        <button data-dir="right" type="button" aria-label="Prawo">→</button>
+                    </div>
+                </div>
+
+                <p class="tip" data-i18n="tip">
+                    WASD / strzałki — ruch, spacja — start / pauza
+                </p>
+            </div>
+
+        </aside>
+    </main>
+
+    <footer class="footer">
+        SNAKE WORLD <span>•</span> ARCADE EDITION
+    </footer>
+
+</body>
+</html>

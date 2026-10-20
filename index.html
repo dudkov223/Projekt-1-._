@@ -1,0 +1,146 @@
+
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arcade Hub — Snake World</title>
+    <meta name="description" content="Arcade Hub — zagraj w Snake World.">
+    <link rel="stylesheet" href="menu.css">
+    <script src="menu.js" defer></script>
+</head>
+<body>
+    <div class="bg-glow bg-glow-one" aria-hidden="true"></div>
+    <div class="bg-glow bg-glow-two" aria-hidden="true"></div>
+    <header class="topbar">
+        <a class="logo" href="index.html" aria-label="Arcade Hub — strona główna">
+            <span class="logo-icon" aria-hidden="true">▦</span>
+            <span>ARCADE<span class="logo-color">HUB</span></span>
+        </a>
+        <nav class="nav" aria-label="Nawigacja główna">
+            <a href="#gry" data-i18n="games">Gry</a>
+        </nav>
+        <div class="language-picker">
+            <label for="language-select" data-i18n="languageLabel">
+                Język
+            </label>
+            <select id="language-select">
+                <option value="pl">Polski</option>
+                <option value="en">English</option>
+            </select>
+        </div>
+        <span class="top-label">
+            <span class="online-dot"></span>
+            <span data-i18n="collection">1 GRA W KOLEKCJI</span>
+        </span>
+    </header>
+    <main>
+        <section class="hero" aria-labelledby="hero-title">
+            <div class="hero-text">
+                <p class="eyebrow">
+                    <span class="tiny-square"></span>
+                    <span data-i18n="welcome">TWOJE CENTRUM GIER</span>
+                </p>
+                <h1 id="hero-title">
+                    <span class="hero-first-line" data-i18n="heroFirst">
+                        JEDNA GRA.
+                    </span>
+                    <br>
+                    <span data-i18n="heroSecond">SNAKE WORLD.</span>
+                </h1>
+                <div class="hero-actions">
+                    <a class="button button-primary" href="#gry">
+                        <span data-i18n="goToGame">PRZEJDŹ DO GRY</span>
+                        <span aria-hidden="true">↗</span>
+                    </a>
+                    <a class="button button-outline" href="snake.html">
+                        <span aria-hidden="true">▶</span>
+                        <span data-i18n="playSnake">ZAGRAJ W SNAKE</span>
+                    </a>
+                </div>
+                <div class="hero-stats">
+                    <div>
+                        <strong>01</strong>
+                        <span data-i18n="availableGame">GRA DOSTĘPNA</span>
+                    </div>
+                    <div>
+                        <strong>TOP</strong>
+                        <span data-i18n="ranking">RANKING W GRZE</span>
+                    </div>
+                    <div>
+                        <strong>∞</strong>
+                        <span data-i18n="fun">ZABAWA</span>
+                    </div>
+                </div>
+            </div>
+            <div class="preview" aria-hidden="true">
+                <div class="preview-header">
+                    <span>
+                        <i></i>
+                        <i></i>
+                        <i></i>
+                    </span>
+                    <span data-i18n="preview">PODGLĄD // SNAKE WORLD</span>
+                </div>
+                <div class="preview-board">
+                    <span class="snake-piece p1"></span>
+                    <span class="snake-piece p2"></span>
+                    <span class="snake-piece p3"></span>
+                    <span class="snake-piece p4"></span>
+                    <span class="snake-piece p5"></span>
+                    <span class="preview-fruit"></span>
+                    <span class="preview-block b1"></span>
+                    <span class="preview-block b2"></span>
+                    <span class="preview-block b3"></span>
+                </div>
+                <div class="preview-footer">
+                    <span></span>
+                    <span data-i18n="previewScore">WYNIK: 0240</span>
+                </div>
+            </div>
+        </section>
+        <section id="gry" class="library" aria-labelledby="games-title">
+            <div class="section-top">
+                <div>
+                    <p class="eyebrow" data-i18n="library">
+                        BIBLIOTEKA GIER
+                    </p>
+                    <h2 id="games-title" data-i18n="availableTitle">
+                        DOSTĘPNA GRA
+                    </h2>
+                </div>
+                <span class="results" data-i18n="oneGame">1 gra</span>
+            </div>
+            <div class="games-grid single-game">
+                <article class="game-card snake-card">
+                    <div class="card-art snake-art" aria-hidden="true">
+                        <span class="art-grid"></span>
+                        <span class="art-emoji">🐍</span>
+                        <span class="art-word">SNAKE</span>
+                    </div>
+                    <div class="card-body">
+                        <span class="status ready">
+                            <span></span>
+                            <span data-i18n="available">DOSTĘPNA</span>
+                        </span>
+                        <h3>Snake World</h3>
+                        <p data-i18n="snakeDescription">
+                            Klasyczny Snake z czterema mapami,
+                            rankingiem TOP 10, poziomami trudności,
+                            odliczaniem i własnymi ustawieniami.
+                        </p>
+                        <div class="tags">
+                            <span>ARCADE</span>
+                            <span data-i18n="onePlayer">1 GRACZ</span>
+                        </div>
+                        <a class="play-link" href="snake.html">
+                            <span data-i18n="playNow">ZAGRAJ TERAZ</span>
+                            <span aria-hidden="true">↗</span>
+                        </a>
+                    </div>
+                </article>
+            </div>
+        </section>
+    </main>
+</body>
+</html>
