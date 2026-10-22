@@ -1,67 +1,97 @@
 
-const ArcadeAudio = (() => {
-    let audio = null;
+const arcadeAudio = (() => {
+    let context = null;
     let musicTimer = null;
-    let musicStep = 0;
-    let game = "snake";
     let playing = false;
+    let game = "snake";
+    let language = "pl";
+    let noteIndex = 0;
 
-    let soundOn = localStorage.getItem("arcade-sound") !== "false";
-    let musicOn = localStorage.getItem("arcade-music") !== "false";
+    let soundOn = true;
+    let musicOn = true;
+
+    try {
+        soundOn = localStorage.getItem("arcade-sound") !== "false";
+        musicOn = localStorage.getItem("arcade-music") !== "false";
+    } catch (error) {
+        console.log(error);
+    }
 
     const melodies = {
         snake: [
             392, 0, 523, 659, 0, 523, 440, 0,
             349, 440, 523, 0, 392, 0, 330, 0
         ],
+
         tetris: [
             330, 392, 440, 392, 330, 294, 262, 0,
             294, 330, 392, 330, 294, 262, 247, 0,
             262, 330, 392, 523, 494, 392, 330, 0,
             349, 440, 523, 440, 392, 330, 294, 0
+        ],
+
+        pong: [
+            220, 0, 330, 0, 440, 330, 0, 262,
+            0, 392, 330, 0, 294, 0, 247, 0
         ]
     };
 
     function unlock() {
         try {
-            if (!audio) {
-                audio = new (
+            if (!context) {
+                const AudioType =
                     window.AudioContext ||
-                    window.webkitAudioContext
-                )();
+                    window.webkitAudioContext;
+
+                if (!AudioType) return false;
+
+                context = new AudioType();
             }
-            if (audio.state === "suspended") {
-                audio.resume();
+
+            if (context.state === "suspended") {
+                context.resume();
             }
+
+            return true;
         } catch (error) {
-            console.log("Dźwięk niedostępny:", error);
+            return false;
         }
     }
 
-    function beep(freq, duration = 0.1, type = "square",
-                  volume = 0.035, delay = 0) {
-        if (!audio || !freq) return;
+    function beep(
+        frequency,
+        duration = 0.1,
+        type = "square",
+        volume = 0.035,
+        delay = 0
+    ) {
+        if (!context || !frequency) return;
 
-        const start = audio.currentTime + delay;
-        const osc = audio.createOscillator();
-        const gain = audio.createGain();
+        const start = context.currentTime + delay;
 
-        osc.type = type;
-        osc.frequency.value = freq;
+        const oscillator = context.createOscillator();
+        const gain = context.createGain();
+
+        oscillator.type = type;
+        oscillator.frequency.value = frequency;
 
         gain.gain.setValueAtTime(0.0001, start);
+
         gain.gain.exponentialRampToValueAtTime(
-            volume, start + 0.01
-        );
-        gain.gain.exponentialRampToValueAtTime(
-            0.0001, start + duration
+            volume,
+            start + 0.01
         );
 
-        osc.connect(gain);
-        gain.connect(audio.destination);
+        gain.gain.exponentialRampToValueAtTime(
+            0.0001,
+            start + duration
+        );
 
-        osc.start(start);
-        osc.stop(start + duration + 0.02);
+        oscillator.connect(gain);
+        gain.connect(context.destination);
+
+        oscillator.start(start);
+        oscillator.stop(start + duration + 0.02);
     }
 
     function effect(name) {
@@ -116,6 +146,15 @@ const ArcadeAudio = (() => {
             beep(880, 0.2, "square", 0.04, 0.18);
         }
 
+        if (name === "paddle") {
+            beep(420, 0.055, "square", 0.018);
+        }
+
+        if (name === "point") {
+            beep(640, 0.11, "triangle", 0.04);
+            beep(840, 0.17, "square", 0.025, 0.1);
+        }
+
         if (name === "pause") {
             beep(300, 0.1, "triangle", 0.025);
         }
@@ -139,16 +178,18 @@ const ArcadeAudio = (() => {
     }
 
     function playNote() {
-        if (!playing || !musicOn || document.hidden) return;
+        if (!playing || !musicOn || document.hidden) {
+            return;
+        }
 
         const melody = melodies[game];
-        const note = melody[musicStep % melody.length];
+        const frequency = melody[noteIndex % melody.length];
 
-        musicStep++;
+        noteIndex++;
 
-        if (note) {
+        if (frequency) {
             beep(
-                note,
+                frequency,
                 0.13,
                 game === "snake" ? "triangle" : "square",
                 0.012
@@ -159,64 +200,90 @@ const ArcadeAudio = (() => {
     function startMusic() {
         stopMusic();
 
-        if (!playing || !musicOn || document.hidden) return;
+        if (!playing || !musicOn || document.hidden) {
+            return;
+        }
 
         unlock();
         playNote();
 
-        musicTimer = setInterval(
-            playNote,
-            game === "snake" ? 225 : 185
-        );
+        let interval = 225;
+
+        if (game === "tetris") interval = 185;
+        if (game === "pong") interval = 260;
+
+        musicTimer = setInterval(playNote, interval);
     }
 
     function setPlaying(value) {
-        playing = value;
+        playing = Boolean(value);
         startMusic();
     }
 
-    function updateButtons() {
-        const soundButton = document.getElementById("sound-btn");
-        const musicButton = document.getElementById("music-btn");
+    function refresh(newLanguage = language) {
+        language = newLanguage;
 
-        const english = document.documentElement.lang === "en";
+        const soundBtn = document.getElementById("sound-btn");
+        const musicBtn = document.getElementById("music-btn");
 
-        if (soundButton) {
-            soundButton.textContent = soundOn
-                ? (english ? "🔊 Sound ON" : "🔊 Dźwięk WŁ.")
-                : (english ? "🔇 Sound OFF" : "🔇 Dźwięk WYŁ.");
+        if (soundBtn) {
+            soundBtn.textContent = soundOn
+                ? (language === "en"
+                    ? "🔊 Sound ON"
+                    : "🔊 Dźwięk WŁ.")
+                : (language === "en"
+                    ? "🔇 Sound OFF"
+                    : "🔇 Dźwięk WYŁ.");
+
+            soundBtn.setAttribute("aria-pressed", String(soundOn));
         }
 
-        if (musicButton) {
-            musicButton.textContent = musicOn
-                ? (english ? "🎵 Music ON" : "🎵 Muzyka WŁ.")
-                : (english ? "🎵 Music OFF" : "🎵 Muzyka WYŁ.");
+        if (musicBtn) {
+            musicBtn.textContent = musicOn
+                ? (language === "en"
+                    ? "🎵 Music ON"
+                    : "🎵 Muzyka WŁ.")
+                : (language === "en"
+                    ? "🎵 Music OFF"
+                    : "🎵 Muzyka WYŁ.");
+
+            musicBtn.setAttribute("aria-pressed", String(musicOn));
         }
     }
 
-    function init(selectedGame) {
-        game = selectedGame;
-        updateButtons();
+    function init(gameName, selectedLanguage = "pl") {
+        game = gameName;
+        language = selectedLanguage;
 
-        document.getElementById("sound-btn")
-            ?.addEventListener("click", () => {
-                soundOn = !soundOn;
+        const soundBtn = document.getElementById("sound-btn");
+        const musicBtn = document.getElementById("music-btn");
+
+        soundBtn?.addEventListener("click", () => {
+            soundOn = !soundOn;
+
+            try {
                 localStorage.setItem("arcade-sound", soundOn);
+            } catch (error) {}
 
-                unlock();
-                updateButtons();
+            unlock();
+            refresh();
 
-                if (soundOn) effect("start");
-            });
+            if (soundOn) effect("start");
+        });
 
-        document.getElementById("music-btn")
-            ?.addEventListener("click", () => {
-                musicOn = !musicOn;
+        musicBtn?.addEventListener("click", () => {
+            musicOn = !musicOn;
+
+            try {
                 localStorage.setItem("arcade-music", musicOn);
+            } catch (error) {}
 
-                startMusic();
-                updateButtons();
-            });
+            unlock();
+            startMusic();
+            refresh();
+        });
+
+        refresh();
     }
 
     document.addEventListener("visibilitychange", startMusic);
@@ -227,6 +294,6 @@ const ArcadeAudio = (() => {
         unlock,
         effect,
         setPlaying,
-        updateButtons
+        refresh
     };
 })();

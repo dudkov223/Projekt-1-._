@@ -1,17 +1,11 @@
 
 const filters = document.querySelectorAll(".filter-btn");
 const games = document.querySelectorAll(".game-card");
-
 const visibleCount = document.getElementById("visible-count");
 
 function gameWord(number) {
-    if (number === 1) {
-        return "gra";
-    }
-
-    if (number >= 2 && number <= 4) {
-        return "gry";
-    }
+    if (number === 1) return "gra";
+    if (number >= 2 && number <= 4) return "gry";
 
     return "gier";
 }
@@ -19,7 +13,6 @@ function gameWord(number) {
 filters.forEach(button => {
     button.addEventListener("click", () => {
         const selected = button.dataset.filter;
-
         let count = 0;
 
         filters.forEach(item => {

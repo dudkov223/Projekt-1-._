@@ -2,324 +2,1139 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Snake World — Arcade Edition</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Snake World | Arcade Hub</title>
 
-    <link rel="stylesheet" href="styl.css">
+<style>
+:root {
+    --bg: #0c1523;
+    --panel: #1b2a40;
+    --line: #354b5e;
+    --text: #f3fcff;
+    --accent: #59efbd;
+    --muted: #b0c4d3;
+}
 
-    <script src="audio.js" defer></script>
-    <script src="script.js" defer></script>
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: Arial, sans-serif;
+    text-align: center;
+}
+
+body.light {
+    --bg: #eaf3f9;
+    --panel: #fff;
+    --line: #bfd0dd;
+    --text: #193245;
+    --muted: #526b7b;
+}
+
+header {
+    padding: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    border-bottom: 1px solid var(--line);
+}
+
+a { color: var(--accent); }
+
+h1 {
+    margin: 14px 0 8px;
+    color: var(--accent);
+}
+
+main {
+    max-width: 1050px;
+    margin: auto;
+    padding: 14px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 280px;
+    gap: 16px;
+}
+
+.play { min-width: 0; }
+
+.tools {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 0 0 10px;
+}
+
+button, select, input { font: inherit; }
+
+button, select {
+    padding: 10px;
+    background: var(--panel);
+    color: var(--text);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+button:hover { border-color: var(--accent); }
+button:disabled { opacity: .5; }
+
+.boardbox {
+    position: relative;
+    width: min(100%, 540px);
+    aspect-ratio: 1;
+    margin: auto;
+    border: 3px solid var(--accent);
+    border-radius: 9px;
+    overflow: hidden;
+    background: #102131;
+}
+
+canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    touch-action: none;
+}
+
+.cover {
+    position: absolute;
+    inset: 0;
+    background: #0d1724df;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 15px;
+    color: white;
+}
+
+.cover h2 { font-size: 29px; }
+
+.cover button, .primary {
+    background: var(--accent);
+    color: #06261e;
+    font-weight: bold;
+}
+
+.panel {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 12px;
+    text-align: left;
+}
+
+.panel h3 { margin: 0 0 10px; }
+.panel label { display: block; margin: 9px 0; }
+.panel strong { color: var(--accent); }
+
+.score {
+    font-size: 36px;
+    color: var(--accent);
+    font-weight: 900;
+}
+
+.small {
+    font-size: 12px;
+    color: var(--muted);
+}
+
+.mobile-pad {
+    display: grid;
+    grid-template-columns: repeat(3, 62px);
+    justify-content: center;
+    gap: 6px;
+    margin: 12px auto;
+}
+
+.mobile-pad button {
+    height: 55px;
+    font-size: 26px;
+    touch-action: manipulation;
+}
+
+.mobile-pad .up { grid-column: 2; }
+.mobile-pad .left { grid-column: 1; grid-row: 2; }
+.mobile-pad .pause { grid-column: 2; grid-row: 2; }
+.mobile-pad .right { grid-column: 3; grid-row: 2; }
+.mobile-pad .down { grid-column: 2; grid-row: 3; }
+
+.name {
+    max-width: 140px;
+    width: 100%;
+    padding: 9px;
+    border: 1px solid var(--line);
+    border-radius: 7px;
+}
+
+.fullscreen:fullscreen {
+    background: var(--bg);
+    padding: 12px;
+    overflow: auto;
+    display: block;
+}
+
+.fullscreen:fullscreen .boardbox {
+    width: min(78dvh, 95vw, 700px);
+}
+
+ol {
+    padding-left: 25px;
+    font-size: 14px;
+}
+
+.inline {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+#message {
+    min-height: 20px;
+    color: var(--accent);
+}
+
+@media (max-width: 770px) {
+    main {
+        grid-template-columns: 1fr;
+        max-width: 560px;
+    }
+
+    .boardbox {
+        width: min(100%, min(53dvh, 480px));
+    }
+
+    header { font-size: 13px; }
+    h1 { font-size: 25px; }
+
+    .fullscreen:fullscreen .boardbox {
+        width: min(47dvh, 95vw, 420px);
+    }
+
+    .mobile-pad {
+        grid-template-columns: repeat(3, 56px);
+        gap: 4px;
+    }
+
+    .mobile-pad button { height: 45px; }
+}
+</style>
 </head>
 
 <body>
-    <header class="topbar">
-        <div class="brand">
-            <span class="brand-icon">🐍</span>
-            <div>
-                <p class="eyebrow">ARCADE EDITION <span class="pulse"></span></p>
-                <h1>SNAKE <span>WORLD</span></h1>
-                <p class="subtitle" data-i18n="subtitle">
-                    Klasyczna gra w nowym wydaniu
+
+<header>
+    <a href="index.html" id="back">← Menu</a>
+    <strong>Snake World</strong>
+
+    <label>
+        <span id="lang-label">Język</span>
+        <select id="lang">
+            <option value="pl">Polski</option>
+            <option value="en">English</option>
+        </select>
+    </label>
+
+    <label>
+        <span id="theme-label">Motyw</span>
+        <select id="theme">
+            <option value="dark">Ciemny</option>
+            <option value="light">Jasny</option>
+        </select>
+    </label>
+</header>
+
+<h1>SNAKE WORLD</h1>
+
+<main>
+
+    <section class="play fullscreen" id="game">
+
+        <div class="tools">
+            <button id="start" class="primary">Nowa gra</button>
+            <button id="pause" disabled>Pauza</button>
+            <button id="full">Pełny ekran</button>
+            <button id="sound">Dźwięk: WŁ.</button>
+            <button id="music">Muzyka: WŁ.</button>
+        </div>
+
+        <p id="mapinfo">NEON CITY</p>
+
+        <div class="boardbox">
+            <canvas id="board" width="600" height="600"></canvas>
+
+            <div class="cover" id="cover">
+                <h2 id="cover-title">Gotowy do gry?</h2>
+                <p id="cover-text">
+                    Zbieraj owoce i unikaj przeszkód.
                 </p>
+                <button id="cover-start">ROZPOCZNIJ</button>
             </div>
         </div>
 
-        <a href="index.html" class="home-link" data-i18n="backMenu">
-            ← Menu główne
-        </a>
-
-        <div class="settings">
-            <label for="theme-select" data-i18n="themeLabel">Motyw</label>
-            <select id="theme-select">
-                <option value="dark" data-i18n="darkTheme">🌙 Ciemny</option>
-                <option value="light" data-i18n="lightTheme">☀️ Jasny</option>
-            </select>
-
-            <label for="graphics-select" data-i18n="graphicsLabel">Grafika</label>
-            <select id="graphics-select">
-                <option value="modern" data-i18n="modernGraphics">✨ Nowoczesna</option>
-                <option value="retro" data-i18n="retroGraphics">▣ Retro</option>
-            </select>
-
-            <label for="difficulty-select" data-i18n="difficultyLabel">Trudność</label>
-            <select id="difficulty-select">
-                <option value="normal" data-i18n="normalMode">Normalny</option>
-                <option value="hard" data-i18n="hardMode">Trudny ☠</option>
-            </select>
-
-            <label for="language-select" data-i18n="languageLabel">Język</label>
-            <select id="language-select">
-                <option value="pl">Polski</option>
-                <option value="en">English</option>
-            </select>
+        <div class="mobile-pad">
+            <button class="up" data-dir="up">↑</button>
+            <button class="left" data-dir="left">←</button>
+            <button class="pause" id="touch-pause">Ⅱ</button>
+            <button class="right" data-dir="right">→</button>
+            <button class="down" data-dir="down">↓</button>
         </div>
-    </header>
 
-    <main class="layout">
+        <p id="message">
+            WASD, strzałki lub gesty na planszy.
+        </p>
+    </section>
 
-        <section class="game-section" id="game-section">
+    <aside>
 
-            <div class="fullscreen-toolbar">
-                <button class="fullscreen-btn" id="sound-btn" type="button">
-                    🔊 Dźwięk WŁ.
-                </button>
+        <section class="panel">
+            <h3 id="results-title">Wyniki</h3>
 
-                <button class="fullscreen-btn" id="music-btn" type="button">
-                    🎵 Muzyka WŁ.
-                </button>
+            <div class="score" id="score">0</div>
 
-                <button class="fullscreen-btn" id="fullscreen-btn" type="button">
-                    ⛶ Pełny ekran
-                </button>
-            </div>
-
-            <div class="map-info">
-                <div>
-                    <span class="mini-label" data-i18n="worldLabel">
-                        AKTUALNY ŚWIAT
-                    </span>
-                    <strong id="map-name">NEON CITY</strong>
-                </div>
-
-                <div class="map-timer">
-                    <span data-i18n="nextMap" id="next-map-label">
-                        Nowa mapa za
-                    </span>
-                    <strong>
-                        <span id="map-time">20</span>
-                        <span id="map-unit">s</span>
-                    </strong>
-                </div>
-            </div>
-
-            <div class="board-box" id="board-box">
-                <canvas
-                    id="board"
-                    width="600"
-                    height="600"
-                    aria-label="Plansza Snake"
-                ></canvas>
-
-                <div class="overlay" id="overlay">
-                    <div class="overlay-card">
-                        <div class="emoji">🐍</div>
-
-                        <p class="eyebrow" data-i18n="welcome">
-                            SNAKE WORLD
-                        </p>
-
-                        <h2 id="overlay-title">Gotowy do gry?</h2>
-                        <p id="overlay-desc">
-                            Zbieraj owoce i unikaj przeszkód!
-                        </p>
-
-                        <button
-                            id="overlay-btn"
-                            type="button"
-                            class="primary-btn"
-                        >
-                            ▶ Rozpocznij
-                        </button>
-
-                        <div id="save-score-box" class="save-score-box" hidden>
-                            <label for="player-name" data-i18n="nameLabel">
-                                Nazwa gracza
-                            </label>
-
-                            <input
-                                id="player-name"
-                                type="text"
-                                maxlength="16"
-                                autocomplete="nickname"
-                                placeholder="Gracz"
-                            >
-
-                            <button
-                                id="save-score-btn"
-                                type="button"
-                                data-i18n="saveScore"
-                            >
-                                💾 Zapisz wynik
-                            </button>
-
-                            <p id="save-score-feedback" aria-live="polite"></p>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="map-banner" class="map-banner"></div>
-                <div id="score-float" class="score-float">+10</div>
-
-                <div
-                    id="start-countdown"
-                    class="start-countdown"
-                    aria-live="assertive"
-                    hidden
-                ></div>
-            </div>
-
-            <p class="message" id="message">
-                Sterowanie: WASD lub strzałki, spacja — start / pauza.
+            <p>
+                <span id="best-label">Rekord</span>:
+                <strong id="best">0</strong>
             </p>
 
-            <p class="difficulty-hint" id="difficulty-hint"></p>
+            <p>
+                <span id="fruit-label">Owoce</span>:
+                <strong id="fruit-count">0</strong>
+            </p>
         </section>
 
-        <aside class="sidebar">
-            <div class="card score-card">
-                <p class="section-title" data-i18n="scoreLabel">
-                    TWÓJ WYNIK
-                </p>
+        <section class="panel">
+            <h3 id="settings-title">Ustawienia</h3>
 
-                <strong class="score" id="score">0</strong>
+            <label>
+                <span id="difficulty-label">Poziom</span>
+                <select id="difficulty">
+                    <option value="normal">Normalny</option>
+                    <option value="hard">Trudny</option>
+                </select>
+            </label>
 
-                <div class="stat">
-                    <span data-i18n="bestLabel">🏆 Rekord</span>
-                    <strong id="best">0</strong>
-                </div>
+            <label>
+                <input type="checkbox" id="maps" checked>
+                <span id="maps-label">Zmiana map</span>
+            </label>
 
-                <div class="stat">
-                    <span data-i18n="fruitsLabel">🍎 Owoce</span>
-                    <strong id="eaten">0</strong>
-                </div>
+            <label>
+                <input type="checkbox" id="obstacles" checked>
+                <span id="obstacles-label">Przeszkody</span>
+            </label>
 
-                <div class="stat">
-                    <span data-i18n="levelLabel">⚡ Poziom szybkości</span>
-                    <strong id="speed">1</strong>
-                </div>
-            </div>
+            <label>
+                <input type="checkbox" id="speedup" checked>
+                <span id="speed-label">Przyspieszanie</span>
+            </label>
 
-            <div class="card options-card">
-                <div class="card-heading">
-                    <h2 data-i18n="optionsTitle">
-                        ⚙️ Ustawienia gry
-                    </h2>
-                    <span class="small-tag" data-i18n="personalize">
-                        DOPASUJ
-                    </span>
-                </div>
+            <label>
+                <input type="checkbox" id="retro">
+                <span id="retro-label">Grafika retro</span>
+            </label>
+        </section>
 
-                <label class="switch-row" for="opt-maps">
-                    <span>
-                        <strong data-i18n="mapsOption">Zmiana map</strong>
-                        <small data-i18n="mapsDesc">
-                            Nowy świat co 20 / 8 sekund
-                        </small>
-                    </span>
-                    <input id="opt-maps" type="checkbox" checked>
-                </label>
+        <section class="panel">
+            <h3>TOP 10</h3>
 
-                <label class="switch-row" for="opt-obstacles">
-                    <span>
-                        <strong data-i18n="obstaclesOption">Przeszkody</strong>
-                        <small data-i18n="obstaclesDesc">
-                            Bloki do omijania
-                        </small>
-                    </span>
-                    <input id="opt-obstacles" type="checkbox" checked>
-                </label>
+            <ol id="ranking"></ol>
 
-                <label class="switch-row" for="opt-acceleration">
-                    <span>
-                        <strong data-i18n="speedOption">Przyspieszanie</strong>
-                        <small data-i18n="speedDesc">
-                            Wąż przyspiesza po owocach
-                        </small>
-                    </span>
-                    <input id="opt-acceleration" type="checkbox" checked>
-                </label>
-
-                <label class="switch-row" for="opt-grid">
-                    <span>
-                        <strong data-i18n="gridOption">Siatka planszy</strong>
-                        <small data-i18n="gridDesc">
-                            Linie dzielące pola
-                        </small>
-                    </span>
-                    <input id="opt-grid" type="checkbox" checked>
-                </label>
-
-                <label class="switch-row" for="opt-effects">
-                    <span>
-                        <strong data-i18n="effectsOption">Efekty graficzne</strong>
-                        <small data-i18n="effectsDesc">
-                            Poświata i animacje
-                        </small>
-                    </span>
-                    <input id="opt-effects" type="checkbox" checked>
-                </label>
-
-                <p class="option-note" id="option-note" data-i18n="optionsNote">
-                    Zasady zmienisz przed grą.
-                </p>
-            </div>
-
-            <div class="card ranking-card">
-                <div class="card-heading">
-                    <h2 data-i18n="rankingTitle">🏆 TOP 10</h2>
-
-                    <select id="ranking-filter">
-                        <option value="normal" data-i18n="normalMode">
-                            Normalny
-                        </option>
-                        <option value="hard" data-i18n="hardMode">
-                            Trudny ☠
-                        </option>
-                        <option value="customNormal" data-i18n="customNormal">
-                            Własny · Normalny
-                        </option>
-                        <option value="customHard" data-i18n="customHard">
-                            Własny · Trudny
-                        </option>
-                    </select>
-                </div>
-
-                <ol id="ranking-list" class="ranking-list"></ol>
-                <p id="ranking-empty" class="ranking-empty"></p>
-
-                <p class="ranking-note" data-i18n="rankingNote">
-                    Wyniki są zapisane lokalnie.
-                </p>
-            </div>
-
-            <div class="card buttons">
-                <button
-                    id="start-btn"
-                    class="primary-btn"
-                    type="button"
-                    data-i18n="newGame"
+            <div class="inline">
+                <input
+                    class="name"
+                    id="nickname"
+                    maxlength="14"
+                    placeholder="Nick"
                 >
-                    ↻ Nowa gra
-                </button>
-
-                <button id="pause-btn" type="button" disabled>
-                    Ⅱ Pauza
-                </button>
+                <button id="save" disabled>Zapisz</button>
             </div>
 
-            <div class="card controls-card">
-                <h2 data-i18n="controlsLabel">STEROWANIE</h2>
+            <p class="small" id="save-msg"></p>
+        </section>
+    </aside>
 
-                <div class="arrows">
-                    <button data-dir="up" type="button">↑</button>
-                    <div>
-                        <button data-dir="left" type="button">←</button>
-                        <button data-dir="down" type="button">↓</button>
-                        <button data-dir="right" type="button">→</button>
-                    </div>
-                </div>
+</main>
 
-                <p class="tip" data-i18n="tip">
-                    WASD / strzałki — ruch, spacja — start / pauza
-                </p>
-            </div>
-        </aside>
+<script>
+"use strict";
 
-    </main>
+const $ = id => document.getElementById(id);
+const canvas = $("board");
+const ctx = canvas.getContext("2d");
 
-    <footer class="footer">
-        SNAKE WORLD <span>•</span> ARCADE
-    </footer>
+const tr = {
+    pl: {
+        back: "← Menu",
+        lang: "Język",
+        theme: "Motyw",
+        new: "Nowa gra",
+        pause: "Pauza",
+        resume: "Wznów",
+        full: "Pełny ekran",
+        score: "Wyniki",
+        best: "Rekord",
+        fruit: "Owoce",
+        settings: "Ustawienia",
+        difficulty: "Poziom",
+        maps: "Zmiana map",
+        obstacles: "Przeszkody",
+        speed: "Przyspieszanie",
+        retro: "Grafika retro",
+        ready: "Gotowy do gry?",
+        how: "Zbieraj owoce i unikaj przeszkód.",
+        begin: "ROZPOCZNIJ",
+        over: "Koniec gry!",
+        paused: "Pauza",
+        save: "Zapisz",
+        saved: "Zapisano wynik",
+        control: "WASD, strzałki lub gesty na planszy.",
+        sound: "Dźwięk",
+        music: "Muzyka",
+        on: "WŁ.",
+        off: "WYŁ."
+    },
+    en: {
+        back: "← Menu",
+        lang: "Language",
+        theme: "Theme",
+        new: "New game",
+        pause: "Pause",
+        resume: "Resume",
+        full: "Fullscreen",
+        score: "Score",
+        best: "Best",
+        fruit: "Fruit",
+        settings: "Settings",
+        difficulty: "Level",
+        maps: "Changing maps",
+        obstacles: "Obstacles",
+        speed: "Speed up",
+        retro: "Retro graphics",
+        ready: "Ready to play?",
+        how: "Collect fruit and avoid obstacles.",
+        begin: "START",
+        over: "Game over!",
+        paused: "Paused",
+        save: "Save",
+        saved: "Score saved",
+        control: "WASD, arrows or swipe the board.",
+        sound: "Sound",
+        music: "Music",
+        on: "ON",
+        off: "OFF"
+    }
+};
+
+let lang = "pl";
+
+try {
+    lang = localStorage.getItem("snake-language") === "en"
+        ? "en"
+        : "pl";
+} catch (e) {}
+
+function t(key) {
+    return tr[lang][key] || key;
+}
+
+function memGet(key, def) {
+    try {
+        return localStorage.getItem(key) ?? def;
+    } catch (e) {
+        return def;
+    }
+}
+
+function memSet(key, value) {
+    try {
+        localStorage.setItem(key, String(value));
+    } catch (e) {}
+}
+
+// Dźwięki i muzyka bez plików MP3
+let ac = null;
+let musicTimer = null;
+let note = 0;
+
+let soundOn = memGet("arcade-sound", "true") === "true";
+let musicOn = memGet("arcade-music", "true") === "true";
+
+function unlock() {
+    try {
+        ac ??= new (
+            window.AudioContext || window.webkitAudioContext
+        )();
+
+        ac.resume?.();
+    } catch (e) {}
+}
+
+function beep(h, d = 0.1, v = 0.03) {
+    if (!ac || ac.state !== "running") return;
+
+    let o = ac.createOscillator();
+    let g = ac.createGain();
+    let n = ac.currentTime;
+
+    o.type = "square";
+    o.frequency.value = h;
+
+    g.gain.setValueAtTime(v, n);
+    g.gain.exponentialRampToValueAtTime(0.001, n + d);
+
+    o.connect(g);
+    g.connect(ac.destination);
+
+    o.start(n);
+    o.stop(n + d);
+}
+
+function fx(type) {
+    if (!soundOn) return;
+
+    unlock();
+
+    if (type === "eat") beep(850, 0.12);
+    if (type === "over") beep(190, 0.35);
+    if (type === "map") beep(550, 0.18);
+    if (type === "start") beep(650, 0.18);
+}
+
+function musicSync() {
+    clearInterval(musicTimer);
+    musicTimer = null;
+
+    if (!running || paused || !musicOn) return;
+
+    let tune = [330, 392, 440, 0, 523, 440, 392, 294];
+
+    musicTimer = setInterval(() => {
+        if (document.hidden) return;
+
+        let f = tune[note++ % tune.length];
+
+        if (f) beep(f, 0.12, 0.009);
+    }, 245);
+}
+
+function audioButtons() {
+    $("sound").textContent =
+        t("sound") + ": " + t(soundOn ? "on" : "off");
+
+    $("music").textContent =
+        t("music") + ": " + t(musicOn ? "on" : "off");
+}
+
+$("sound").onclick = () => {
+    soundOn = !soundOn;
+    memSet("arcade-sound", soundOn);
+    unlock();
+    audioButtons();
+    fx("start");
+};
+
+$("music").onclick = () => {
+    musicOn = !musicOn;
+    memSet("arcade-music", musicOn);
+    unlock();
+    musicSync();
+    audioButtons();
+};
+
+// Cztery mapy
+const maps = [
+    {
+        name: "NEON CITY",
+        bg: "#102136",
+        snake: "#53edbd",
+        food: "#ff7697"
+    },
+    {
+        name: "TOXIC FOREST",
+        bg: "#173523",
+        snake: "#b9f17d",
+        food: "#ffcb65"
+    },
+    {
+        name: "VOLCANO",
+        bg: "#381f24",
+        snake: "#ffac68",
+        food: "#ff507a"
+    },
+    {
+        name: "ICE KINGDOM",
+        bg: "#18394b",
+        snake: "#78dcff",
+        food: "#ffa7dc"
+    }
+];
+
+const N = 20;
+const S = 30;
+
+let body = [];
+let dir = { x: 1, y: 0 };
+let next = { x: 1, y: 0 };
+let food = { x: 13, y: 10 };
+let blocks = [];
+
+let score = 0;
+let fruit = 0;
+let stage = 0;
+let remaining = 20;
+
+let running = false;
+let paused = false;
+let gameOver = false;
+
+let timer = null;
+let mapTimer = null;
+let turned = false;
+
+// Ranking
+function rank() {
+    try {
+        let r = JSON.parse(memGet("snake-rank-v2", "[]"));
+        return Array.isArray(r) ? r : [];
+    } catch (e) {
+        return [];
+    }
+}
+
+function showRank() {
+    let ol = $("ranking");
+    ol.replaceChildren();
+
+    rank().forEach(x => {
+        let li = document.createElement("li");
+        li.textContent = x.name + " — " + x.score;
+        ol.append(li);
+    });
+}
+
+function stats() {
+    $("score").textContent = score;
+    $("fruit-count").textContent = fruit;
+
+    $("best").textContent = Math.max(
+        score,
+        ...rank().map(x => x.score),
+        0
+    );
+
+    $("mapinfo").textContent =
+        maps[stage].name +
+        ($("maps").checked ? "  •  " + remaining + " s" : "");
+}
+
+// Losowanie jedzenia
+function putFood() {
+    let empty = [];
+
+    for (let y = 0; y < N; y++) {
+        for (let x = 0; x < N; x++) {
+            if (
+                !body.some(p => p.x === x && p.y === y) &&
+                !blocks.some(p => p.x === x && p.y === y)
+            ) {
+                empty.push({ x, y });
+            }
+        }
+    }
+
+    if (!empty.length) {
+        finish();
+        return;
+    }
+
+    food = empty[Math.floor(Math.random() * empty.length)];
+}
+
+// Tworzenie przeszkód
+function putBlocks() {
+    blocks = [];
+
+    if (!$("obstacles").checked) return;
+
+    let count = stage === 0
+        ? 0
+        : ($("difficulty").value === "hard" ? 26 : 12);
+
+    for (let a = 0; a < count;) {
+        let x = Math.floor(Math.random() * N);
+        let y = Math.floor(Math.random() * N);
+
+        if (
+            Math.abs(x - body[0].x) < 3 &&
+            Math.abs(y - body[0].y) < 3
+        ) continue;
+
+        if (
+            body.some(p => p.x === x && p.y === y) ||
+            blocks.some(p => p.x === x && p.y === y) ||
+            (food.x === x && food.y === y)
+        ) continue;
+
+        blocks.push({ x, y });
+        a++;
+    }
+}
+
+function speed() {
+    if ($("difficulty").value === "hard") {
+        return Math.max(
+            65,
+            140 - ($("speedup").checked ? fruit * 3 : 0)
+        );
+    }
+
+    return Math.max(
+        100,
+        195 - ($("speedup").checked ? fruit * 4 : 0)
+    );
+}
+
+function stop() {
+    clearInterval(timer);
+    clearInterval(mapTimer);
+    timer = null;
+    mapTimer = null;
+}
+
+// Uruchomienie ruchu węża
+function startTimers() {
+    stop();
+
+    timer = setInterval(step, speed());
+
+    if ($("maps").checked) {
+        mapTimer = setInterval(() => {
+            if (!running || paused) return;
+
+            remaining--;
+
+            if (remaining <= 0) {
+                stage = (stage + 1) % 4;
+
+                remaining =
+                    $("difficulty").value === "hard" ? 9 : 20;
+
+                putBlocks();
+                fx("map");
+            }
+
+            stats();
+        }, 1000);
+    }
+}
+
+// Nowa gra
+function start() {
+    unlock();
+
+    body = [
+        { x: 9, y: 10 },
+        { x: 8, y: 10 },
+        { x: 7, y: 10 }
+    ];
+
+    dir = { x: 1, y: 0 };
+    next = { x: 1, y: 0 };
+
+    turned = false;
+    food = { x: 13, y: 10 };
+
+    score = 0;
+    fruit = 0;
+    stage = 0;
+    blocks = [];
+
+    remaining =
+        $("difficulty").value === "hard" ? 9 : 20;
+
+    running = true;
+    gameOver = false;
+    paused = false;
+
+    $("cover").hidden = true;
+    $("save").disabled = true;
+    $("save-msg").textContent = "";
+    $("pause").disabled = false;
+    $("difficulty").disabled = true;
+
+    ["maps", "obstacles", "speedup"].forEach(x => {
+        $(x).disabled = true;
+    });
+
+    putFood();
+    putBlocks();
+
+    stats();
+    draw();
+    startTimers();
+    musicSync();
+    fx("start");
+    refresh();
+}
+
+// Koniec gry
+function finish() {
+    if (gameOver) return;
+
+    running = false;
+    gameOver = true;
+
+    stop();
+    musicSync();
+    fx("over");
+
+    $("cover").hidden = false;
+    $("cover-title").textContent = t("over");
+    $("cover-text").textContent = t("best") + ": " + score;
+    $("cover-start").textContent = t("begin");
+
+    $("pause").disabled = true;
+    $("save").disabled = false;
+    $("difficulty").disabled = false;
+
+    ["maps", "obstacles", "speedup"].forEach(x => {
+        $(x).disabled = false;
+    });
+}
+
+// Jeden ruch węża
+function step() {
+    if (!running || paused) return;
+
+    dir = next;
+    turned = false;
+
+    let head = {
+        x: body[0].x + dir.x,
+        y: body[0].y + dir.y
+    };
+
+    let eating =
+        head.x === food.x &&
+        head.y === food.y;
+
+    if (
+        head.x < 0 ||
+        head.x >= N ||
+        head.y < 0 ||
+        head.y >= N ||
+        blocks.some(p => p.x === head.x && p.y === head.y) ||
+        (eating ? body : body.slice(0, -1))
+            .some(p => p.x === head.x && p.y === head.y)
+    ) {
+        finish();
+        return;
+    }
+
+    body.unshift(head);
+
+    if (eating) {
+        score += 10;
+        fruit++;
+
+        fx("eat");
+        putFood();
+
+        clearInterval(timer);
+        timer = setInterval(step, speed());
+    } else {
+        body.pop();
+    }
+
+    stats();
+    draw();
+}
+
+// Zmiana kierunku
+function change(x, y) {
+    if (!running || paused || turned) return;
+
+    if (dir.x === -x && dir.y === -y) return;
+
+    next = { x, y };
+    turned = true;
+}
+
+// Rysowanie planszy
+function draw() {
+    let m = maps[stage];
+    let retro = $("retro").checked;
+
+    ctx.fillStyle = retro ? "#a9c48a" : m.bg;
+    ctx.fillRect(0, 0, 600, 600);
+
+    ctx.strokeStyle = retro ? "#87a670" : "#ffffff13";
+
+    for (let a = 0; a <= N; a++) {
+        ctx.beginPath();
+
+        ctx.moveTo(a * S, 0);
+        ctx.lineTo(a * S, 600);
+
+        ctx.moveTo(0, a * S);
+        ctx.lineTo(600, a * S);
+
+        ctx.stroke();
+    }
+
+    function cell(p, c) {
+        ctx.fillStyle = c;
+
+        ctx.fillRect(
+            p.x * S + 2,
+            p.y * S + 2,
+            S - 4,
+            S - 4
+        );
+    }
+
+    blocks.forEach(p => {
+        cell(p, retro ? "#657954" : "#688095");
+    });
+
+    cell(food, retro ? "#243e29" : m.food);
+
+    body.forEach((p, i) => {
+        cell(
+            p,
+            retro
+                ? (i === 0 ? "#173520" : "#365f3a")
+                : (i === 0 ? "#f0ffe4" : m.snake)
+        );
+    });
+}
+
+// Pauza
+function pauseGame() {
+    if (!running) return;
+
+    paused = !paused;
+    $("cover").hidden = !paused;
+
+    if (paused) {
+        $("cover-title").textContent = t("paused");
+        $("cover-text").textContent = t("how");
+        $("cover-start").textContent = t("resume");
+        stop();
+    } else {
+        startTimers();
+    }
+
+    musicSync();
+    refresh();
+}
+
+// Aktualizacja języka
+function refresh() {
+    document.documentElement.lang = lang;
+    $("lang").value = lang;
+
+    const ids = {
+        back: "back",
+        lang: "lang-label",
+        theme: "theme-label",
+        new: "start",
+        score: "results-title",
+        best: "best-label",
+        fruit: "fruit-label",
+        settings: "settings-title",
+        difficulty: "difficulty-label",
+        maps: "maps-label",
+        obstacles: "obstacles-label",
+        speed: "speed-label",
+        retro: "retro-label",
+        save: "save",
+        control: "message"
+    };
+
+    for (let k in ids) {
+        $(ids[k]).textContent = t(k);
+    }
+
+    $("pause").textContent = t(paused ? "resume" : "pause");
+    $("full").textContent = t("full");
+
+    if (!running && !gameOver) {
+        $("cover-title").textContent = t("ready");
+        $("cover-text").textContent = t("how");
+        $("cover-start").textContent = t("begin");
+    }
+
+    audioButtons();
+}
+
+// Obsługa przycisków
+$("start").onclick = start;
+
+$("cover-start").onclick = () => {
+    if (paused) pauseGame();
+    else start();
+};
+
+$("pause").onclick = pauseGame;
+$("touch-pause").onclick = pauseGame;
+
+$("full").onclick = async () => {
+    try {
+        if (document.fullscreenElement) {
+            await document.exitFullscreen();
+        } else {
+            await $("game").requestFullscreen();
+        }
+    } catch (e) {
+        console.warn(e);
+    }
+};
+
+$("save").onclick = () => {
+    if (running || !gameOver) return;
+
+    let name = $("nickname").value.trim().slice(0, 14) || "Player";
+    let r = rank();
+
+    r.push({ name, score });
+    r.sort((a, b) => b.score - a.score);
+
+    memSet("snake-rank-v2", JSON.stringify(r.slice(0, 10)));
+
+    $("save").disabled = true;
+    $("save-msg").textContent = t("saved");
+
+    showRank();
+    stats();
+};
+
+$("lang").onchange = () => {
+    lang = $("lang").value;
+    memSet("snake-language", lang);
+    refresh();
+};
+
+$("theme").onchange = () => {
+    document.body.classList.toggle(
+        "light",
+        $("theme").value === "light"
+    );
+};
+
+$("retro").onchange = draw;
+
+// WASD i strzałki na komputerze
+const dirs = {
+    ArrowUp: [0, -1],
+    ArrowDown: [0, 1],
+    ArrowLeft: [-1, 0],
+    ArrowRight: [1, 0],
+    w: [0, -1],
+    s: [0, 1],
+    a: [-1, 0],
+    d: [1, 0]
+};
+
+document.addEventListener("keydown", e => {
+    if (
+        ["INPUT", "SELECT", "TEXTAREA", "BUTTON"]
+            .includes(e.target.tagName)
+    ) return;
+
+    let k = e.key.length === 1
+        ? e.key.toLowerCase()
+        : e.key;
+
+    if (dirs[k]) {
+        e.preventDefault();
+        change(...dirs[k]);
+    } else if (k === " " && !e.repeat) {
+        e.preventDefault();
+
+        if (running) pauseGame();
+        else start();
+    }
+});
+
+// Przyciski dotykowe
+document.querySelectorAll("[data-dir]").forEach(b => {
+    b.onclick = () => {
+        const directions = {
+            up: [0, -1],
+            down: [0, 1],
+            left: [-1, 0],
+            right: [1, 0]
+        };
+
+        change(...directions[b.dataset.dir]);
+    };
+});
+
+// Gesty palcem po planszy
+let gesture = null;
+
+canvas.addEventListener("pointerdown", e => {
+    if (e.pointerType === "mouse") return;
+
+    gesture = {
+        id: e.pointerId,
+        x: e.clientX,
+        y: e.clientY
+    };
+
+    try {
+        canvas.setPointerCapture(e.pointerId);
+    } catch (error) {}
+});
+
+canvas.addEventListener("pointermove", e => {
+    if (!gesture || gesture.id !== e.pointerId) return;
+
+    let dx = e.clientX - gesture.x;
+    let dy = e.clientY - gesture.y;
+
+    if (Math.max(Math.abs(dx), Math.abs(dy)) < 24) return;
+
+    if (Math.abs(dx) > Math.abs(dy)) {
+        change(Math.sign(dx), 0);
+    } else {
+        change(0, Math.sign(dy));
+    }
+
+    gesture.x = e.clientX;
+    gesture.y = e.clientY;
+});
+
+["pointerup", "pointercancel"].forEach(k => {
+    canvas.addEventListener(k, () => {
+        gesture = null;
+    });
+});
+
+// Pierwsze uruchomienie strony
+showRank();
+
+body = [
+    { x: 9, y: 10 },
+    { x: 8, y: 10 },
+    { x: 7, y: 10 }
+];
+
+stats();
+draw();
+refresh();
+
+</script>
 </body>
 </html>

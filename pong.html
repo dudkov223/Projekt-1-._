@@ -1,0 +1,1125 @@
+
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Pong Classic | Arcade Hub</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 14px;
+    background: #101727;
+    color: #f3f8ff;
+    font-family: Arial, sans-serif;
+    text-align: center;
+}
+
+a {
+    color: #79f0c5;
+}
+
+h1 {
+    color: #79f0c5;
+    margin: 12px 0 4px;
+}
+
+.game {
+    max-width: 850px;
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.settings,
+.buttons {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+button,
+select {
+    font: inherit;
+    background: #243650;
+    color: white;
+    border: 1px solid #506783;
+    border-radius: 8px;
+    padding: 10px 13px;
+    cursor: pointer;
+}
+
+button:hover {
+    border-color: #79f0c5;
+}
+
+button:disabled {
+    opacity: .5;
+}
+
+.primary {
+    color: #06251b;
+    background: #61e7b5;
+    font-weight: bold;
+    border-color: #61e7b5;
+}
+
+.score {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: clamp(35px, 10vw, 110px);
+}
+
+.score div {
+    font-weight: bold;
+}
+
+.score b {
+    display: block;
+    font-size: clamp(32px, 7vw, 49px);
+    color: #79f0c5;
+}
+
+.board {
+    width: 100%;
+    max-width: 800px;
+    border: 3px solid #79f0c5;
+    border-radius: 9px;
+    overflow: hidden;
+    background: #081321;
+}
+
+#board {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 5 / 3;
+    touch-action: none;
+}
+
+#message {
+    color: #79f0c5;
+    margin: 0;
+    font-weight: bold;
+    min-height: 22px;
+}
+
+.pad {
+    width: min(100%, 340px);
+    background: #1a2940;
+    border: 1px solid #405873;
+    border-radius: 11px;
+    padding: 10px;
+}
+
+.pad p {
+    margin: 0 0 8px;
+}
+
+.pad-row {
+    display: flex;
+    gap: 8px;
+}
+
+.pad button {
+    flex: 1;
+    min-height: 65px;
+    font-size: 26px;
+    user-select: none;
+    touch-action: none;
+}
+
+.help {
+    font-size: 12px;
+    color: #b8c9da;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.game:fullscreen {
+    min-width: 100%;
+    min-height: 100dvh;
+    padding: 12px;
+    overflow: auto;
+    background: #101727;
+    justify-content: center;
+}
+
+.game:fullscreen .board {
+    max-width: min(96vw, 1020px);
+}
+
+@media (max-width: 620px) {
+    body {
+        padding: 8px;
+    }
+
+    h1 {
+        font-size: 29px;
+        margin: 8px 0;
+    }
+
+    .game {
+        gap: 8px;
+    }
+
+    .score b {
+        font-size: 34px;
+    }
+
+    button,
+    select {
+        font-size: 13px;
+        padding: 8px 11px;
+    }
+
+    .pad button {
+        font-size: 25px;
+        min-height: 66px;
+    }
+
+    .game:fullscreen {
+        justify-content: flex-start;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<a href="index.html">← Arcade Hub</a>
+
+<h1>PONG CLASSIC</h1>
+
+<p class="help">
+    Jeden gracz przeciw komputerowi.
+    Pierwszy do 7 punktów wygrywa.
+</p>
+
+<main class="game" id="game">
+
+    <div class="settings">
+
+        <label for="difficulty">
+            Poziom:
+        </label>
+
+        <select id="difficulty">
+            <option value="easy">Łatwy</option>
+            <option value="normal" selected>Normalny</option>
+            <option value="hard">Trudny</option>
+        </select>
+
+    </div>
+
+    <div class="score">
+
+        <div>
+            GRACZ
+            <b id="score1">0</b>
+        </div>
+
+        <div>
+            KOMPUTER
+            <b id="score2">0</b>
+        </div>
+
+    </div>
+
+    <div class="board">
+        <canvas
+            id="board"
+            width="800"
+            height="480"
+            aria-label="Plansza Pong"
+        ></canvas>
+    </div>
+
+    <div class="buttons">
+
+        <button id="start" class="primary" type="button">
+            Nowa gra
+        </button>
+
+        <button id="pause" type="button" disabled>
+            Pauza
+        </button>
+
+        <button id="full" type="button">
+            Pełny ekran
+        </button>
+
+    </div>
+
+    <div class="buttons">
+
+        <button id="sound" type="button">
+            Dźwięk: WŁ.
+        </button>
+
+        <button id="music" type="button">
+            Muzyka: WŁ.
+        </button>
+
+    </div>
+
+    <p id="message" role="status">
+        Kliknij „Nowa gra”, aby rozpocząć.
+    </p>
+
+    <div class="pad">
+        <p>STEROWANIE GRACZA</p>
+
+        <div class="pad-row">
+
+            <button
+                id="up"
+                type="button"
+                aria-label="W górę"
+            >
+                ▲
+            </button>
+
+            <button
+                id="down"
+                type="button"
+                aria-label="W dół"
+            >
+                ▼
+            </button>
+
+        </div>
+    </div>
+
+    <p class="help">
+        Komputer: W/S lub strzałki góra/dół.
+        Działają też A/D i strzałki lewo/prawo.
+    </p>
+
+    <p class="help">
+        Telefon: przytrzymuj przyciski
+        lub przesuwaj palcem po planszy.
+    </p>
+
+</main>
+
+<script>
+"use strict";
+
+const $ = id => document.getElementById(id);
+
+const canvas = $("board");
+const ctx = canvas.getContext("2d");
+
+// Rozmiary planszy
+
+const WIDTH = 800;
+const HEIGHT = 480;
+
+const PWIDTH = 14;
+const PHEIGHT = 94;
+
+const RADIUS = 9;
+
+// Lewa paletka - gracz
+
+const player = {
+    x: 25,
+    y: 193,
+    score: 0
+};
+
+// Prawa paletka - komputer
+
+const cpu = {
+    x: 761,
+    y: 193,
+    score: 0
+};
+
+// Piłka
+
+const ball = {
+    x: 400,
+    y: 240,
+    vx: 0,
+    vy: 0
+};
+
+const pressed = new Set();
+
+let state = "ready";
+let difficulty = "normal";
+
+let wait = 0;
+let lastTime = 0;
+
+const clamp = (n, a, b) =>
+    Math.max(a, Math.min(b, n));
+
+// Pamięć ustawień
+
+const getSaved = (key, fallback) => {
+    try {
+        return localStorage.getItem(key) ?? fallback;
+    } catch {
+        return fallback;
+    }
+};
+
+const save = (key, value) => {
+    try {
+        localStorage.setItem(
+            key,
+            String(value)
+        );
+    } catch {}
+};
+
+// Dźwięki
+
+let soundOn =
+    getSaved("arcade-sound", "true") !== "false";
+
+let musicOn =
+    getSaved("arcade-music", "true") !== "false";
+
+let audio = null;
+let musicTimer = null;
+let melodyIndex = 0;
+
+function unlockAudio() {
+    try {
+        const Type =
+            window.AudioContext ||
+            window.webkitAudioContext;
+
+        if (!Type) return;
+
+        if (!audio) {
+            audio = new Type();
+        }
+
+        if (audio.state === "suspended") {
+            audio.resume();
+        }
+    } catch {}
+}
+
+function tone(hz, duration = .1, volume = .023) {
+    if (
+        !audio ||
+        audio.state !== "running" ||
+        !hz
+    ) return;
+
+    try {
+        const osc = audio.createOscillator();
+        const gain = audio.createGain();
+        const now = audio.currentTime;
+
+        osc.type = "square";
+        osc.frequency.value = hz;
+
+        gain.gain.setValueAtTime(
+            Math.max(.001, volume),
+            now
+        );
+
+        gain.gain.exponentialRampToValueAtTime(
+            .001,
+            now + duration
+        );
+
+        osc.connect(gain);
+        gain.connect(audio.destination);
+
+        osc.start(now);
+        osc.stop(now + duration);
+    } catch {}
+}
+
+function effect(name) {
+    if (!soundOn) return;
+
+    const notes = {
+        start: 650,
+        paddle: 440,
+        point: 880,
+        over: 190,
+        pause: 300
+    };
+
+    tone(
+        notes[name],
+        name === "over" ? .3 : .09
+    );
+}
+
+function musicSync() {
+    clearInterval(musicTimer);
+    musicTimer = null;
+
+    if (
+        state !== "playing" ||
+        !musicOn ||
+        document.hidden
+    ) return;
+
+    const melody = [
+        220,0,330,0,
+        440,330,262,0,
+        294,392,330,0
+    ];
+
+    musicTimer = setInterval(() => {
+        const hz =
+            melody[melodyIndex++ % melody.length];
+
+        if (hz) {
+            tone(hz, .12, .007);
+        }
+    }, 260);
+}
+
+function updateAudioButtons() {
+    $("sound").textContent =
+        "Dźwięk: " +
+        (soundOn ? "WŁ." : "WYŁ.");
+
+    $("music").textContent =
+        "Muzyka: " +
+        (musicOn ? "WŁ." : "WYŁ.");
+}
+
+$("sound").addEventListener("click", () => {
+    soundOn = !soundOn;
+
+    save("arcade-sound", soundOn);
+    unlockAudio();
+    updateAudioButtons();
+    effect("start");
+});
+
+$("music").addEventListener("click", () => {
+    musicOn = !musicOn;
+
+    save("arcade-music", musicOn);
+    unlockAudio();
+    musicSync();
+    updateAudioButtons();
+});
+
+document.addEventListener(
+    "visibilitychange",
+    musicSync
+);
+
+updateAudioButtons();
+
+// Aktualizacja wyników i przycisków
+
+function updateUI() {
+    $("score1").textContent = player.score;
+    $("score2").textContent = cpu.score;
+
+    $("pause").disabled =
+        state === "ready" ||
+        state === "over";
+
+    $("pause").textContent =
+        state === "paused"
+            ? "Wznów"
+            : "Pauza";
+
+    $("difficulty").disabled =
+        state === "playing" ||
+        state === "paused";
+}
+
+// Ustawianie piłki w środku
+
+function serve(direction) {
+    ball.x = WIDTH / 2;
+    ball.y = HEIGHT / 2;
+
+    ball.vx = 330 * direction;
+
+    ball.vy =
+        (Math.random() - .5) * 260;
+
+    wait = .8;
+}
+
+// Rozpoczęcie gry
+
+function startGame() {
+    unlockAudio();
+
+    difficulty =
+        $("difficulty").value;
+
+    player.y =
+        (HEIGHT - PHEIGHT) / 2;
+
+    cpu.y =
+        (HEIGHT - PHEIGHT) / 2;
+
+    player.score = 0;
+    cpu.score = 0;
+
+    pressed.clear();
+
+    state = "playing";
+
+    serve(
+        Math.random() < .5 ? 1 : -1
+    );
+
+    $("message").textContent =
+        "Gra trwa! Pierwszy do 7 punktów.";
+
+    updateUI();
+    effect("start");
+    musicSync();
+
+    $("start").blur();
+}
+
+// Pauza
+
+function pauseGame() {
+    if (
+        state !== "playing" &&
+        state !== "paused"
+    ) return;
+
+    state =
+        state === "playing"
+            ? "paused"
+            : "playing";
+
+    pressed.clear();
+
+    $("message").textContent =
+        state === "paused"
+            ? "Pauza"
+            : "Gra trwa!";
+
+    effect("pause");
+    musicSync();
+    updateUI();
+
+    $("pause").blur();
+}
+
+// Naliczanie punktów
+
+function point(who) {
+    if (who === "player") {
+        player.score++;
+    } else {
+        cpu.score++;
+    }
+
+    effect("point");
+    updateUI();
+
+    if (
+        player.score >= 7 ||
+        cpu.score >= 7
+    ) {
+        state = "over";
+
+        $("message").textContent =
+            player.score >= 7
+                ? "Wygrałeś!"
+                : "Wygrał komputer!";
+
+        musicSync();
+        effect("over");
+        updateUI();
+    } else {
+        serve(
+            who === "player" ? -1 : 1
+        );
+    }
+}
+
+// Odbijanie piłki od paletek
+
+function bounce(paddle, direction) {
+    const hit = clamp(
+        (
+            ball.y -
+            (paddle.y + PHEIGHT / 2)
+        ) / (PHEIGHT / 2),
+        -1,
+        1
+    );
+
+    const speed = Math.min(
+        720,
+        Math.hypot(
+            ball.vx,
+            ball.vy
+        ) * 1.06
+    );
+
+    ball.vx =
+        direction *
+        speed *
+        Math.cos(hit * .85);
+
+    ball.vy =
+        speed *
+        Math.sin(hit * .85);
+
+    ball.x =
+        direction > 0
+            ? paddle.x + PWIDTH + RADIUS
+            : paddle.x - RADIUS;
+
+    effect("paddle");
+}
+
+// Główna fizyka gry
+
+function physics(dt) {
+    const up =
+        [
+            "KeyW",
+            "KeyA",
+            "ArrowUp",
+            "ArrowLeft"
+        ].some(k => pressed.has(k)) ||
+        pressed.has("button-up");
+
+    const down =
+        [
+            "KeyS",
+            "KeyD",
+            "ArrowDown",
+            "ArrowRight"
+        ].some(k => pressed.has(k)) ||
+        pressed.has("button-down");
+
+    // Ruch gracza
+
+    if (up) {
+        player.y -= 590 * dt;
+    }
+
+    if (down) {
+        player.y += 590 * dt;
+    }
+
+    player.y = clamp(
+        player.y,
+        0,
+        HEIGHT - PHEIGHT
+    );
+
+    // Ruch komputera
+
+    const aiSpeed = {
+        easy: 195,
+        normal: 310,
+        hard: 425
+    }[difficulty];
+
+    const target =
+        (
+            ball.vx > 0
+                ? ball.y
+                : HEIGHT / 2
+        ) - PHEIGHT / 2;
+
+    cpu.y += clamp(
+        target - cpu.y,
+        -aiSpeed * dt,
+        aiSpeed * dt
+    );
+
+    cpu.y = clamp(
+        cpu.y,
+        0,
+        HEIGHT - PHEIGHT
+    );
+
+    // Krótkie oczekiwanie na serw
+
+    if (wait > 0) {
+        wait = Math.max(
+            0,
+            wait - dt
+        );
+
+        return;
+    }
+
+    // Ruch piłki
+
+    ball.x += ball.vx * dt;
+    ball.y += ball.vy * dt;
+
+    // Górna ściana
+
+    if (
+        ball.y - RADIUS <= 0 &&
+        ball.vy < 0
+    ) {
+        ball.y = RADIUS;
+        ball.vy *= -1;
+    }
+
+    // Dolna ściana
+
+    if (
+        ball.y + RADIUS >= HEIGHT &&
+        ball.vy > 0
+    ) {
+        ball.y =
+            HEIGHT - RADIUS;
+
+        ball.vy *= -1;
+    }
+
+    // Lewa paletka
+
+    if (
+        ball.vx < 0 &&
+        ball.x - RADIUS <= player.x + PWIDTH &&
+        ball.x + RADIUS >= player.x &&
+        ball.y + RADIUS >= player.y &&
+        ball.y - RADIUS <= player.y + PHEIGHT
+    ) {
+        bounce(player, 1);
+    }
+
+    // Prawa paletka
+
+    if (
+        ball.vx > 0 &&
+        ball.x + RADIUS >= cpu.x &&
+        ball.x - RADIUS <= cpu.x + PWIDTH &&
+        ball.y + RADIUS >= cpu.y &&
+        ball.y - RADIUS <= cpu.y + PHEIGHT
+    ) {
+        bounce(cpu, -1);
+    }
+
+    // Kto zdobywa punkt?
+
+    if (ball.x < -RADIUS) {
+        point("cpu");
+    } else if (ball.x > WIDTH + RADIUS) {
+        point("player");
+    }
+}
+
+// Rysowanie gry
+
+function draw() {
+    ctx.fillStyle = "#081321";
+    ctx.fillRect(0, 0, WIDTH, HEIGHT);
+
+    // Linia na środku
+
+    ctx.strokeStyle = "#435572";
+    ctx.setLineDash([11, 14]);
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        WIDTH / 2,
+        0
+    );
+
+    ctx.lineTo(
+        WIDTH / 2,
+        HEIGHT
+    );
+
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Paletka gracza
+
+    ctx.fillStyle = "#79f0c5";
+
+    ctx.fillRect(
+        player.x,
+        player.y,
+        PWIDTH,
+        PHEIGHT
+    );
+
+    // Paletka komputera
+
+    ctx.fillStyle = "#b7a8ff";
+
+    ctx.fillRect(
+        cpu.x,
+        cpu.y,
+        PWIDTH,
+        PHEIGHT
+    );
+
+    // Piłka
+
+    ctx.fillStyle = "#ffffff";
+    ctx.beginPath();
+
+    ctx.arc(
+        ball.x,
+        ball.y,
+        RADIUS,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.fill();
+
+    // Napisy na planszy
+
+    if (state !== "playing") {
+        ctx.fillStyle = "#ffffffe0";
+        ctx.textAlign = "center";
+        ctx.font = "bold 30px Arial";
+
+        const message =
+            state === "paused"
+                ? "PAUZA"
+                : state === "over"
+                    ? "KONIEC GRY"
+                    : "NOWA GRA";
+
+        ctx.fillText(
+            message,
+            WIDTH / 2,
+            HEIGHT / 2 - 28
+        );
+    }
+}
+
+// Pętla animacji
+
+function frame(now) {
+    const dt = lastTime
+        ? Math.min(
+            (now - lastTime) / 1000,
+            .033
+        )
+        : 0;
+
+    lastTime = now;
+
+    if (state === "playing") {
+        physics(dt);
+    }
+
+    draw();
+    requestAnimationFrame(frame);
+}
+
+// Przyciski
+
+$("start").addEventListener(
+    "click",
+    startGame
+);
+
+$("pause").addEventListener(
+    "click",
+    pauseGame
+);
+
+$("full").addEventListener(
+    "click",
+    async () => {
+        try {
+            if (document.fullscreenElement) {
+                await document.exitFullscreen();
+            } else {
+                await $("game").requestFullscreen();
+            }
+        } catch (err) {
+            console.warn(err);
+        }
+
+        $("full").blur();
+    }
+);
+
+// WASD oraz strzałki
+
+document.addEventListener("keydown", e => {
+    if (
+        ["INPUT", "SELECT", "TEXTAREA"]
+            .includes(e.target.tagName)
+    ) {
+        return;
+    }
+
+    if (
+        e.altKey ||
+        e.ctrlKey ||
+        e.metaKey
+    ) {
+        return;
+    }
+
+    const keys = [
+        "KeyW",
+        "KeyA",
+        "KeyS",
+        "KeyD",
+        "ArrowUp",
+        "ArrowDown",
+        "ArrowLeft",
+        "ArrowRight"
+    ];
+
+    if (keys.includes(e.code)) {
+        e.preventDefault();
+        pressed.add(e.code);
+    }
+
+    if (
+        e.code === "Space" &&
+        !e.repeat
+    ) {
+        e.preventDefault();
+
+        if (
+            state === "ready" ||
+            state === "over"
+        ) {
+            startGame();
+        } else {
+            pauseGame();
+        }
+    }
+
+}, true);
+
+// Zwolnienie klawisza
+
+document.addEventListener("keyup", e => {
+    pressed.delete(e.code);
+}, true);
+
+window.addEventListener("blur", () => {
+    pressed.clear();
+});
+
+// Przyciski na telefonie
+
+for (
+    const [id, key] of [
+        ["up", "button-up"],
+        ["down", "button-down"]
+    ]
+) {
+    const button = $(id);
+
+    function release() {
+        pressed.delete(key);
+    }
+
+    button.addEventListener("pointerdown", e => {
+        e.preventDefault();
+
+        button.setPointerCapture?.(
+            e.pointerId
+        );
+
+        pressed.add(key);
+    });
+
+    [
+        "pointerup",
+        "pointercancel",
+        "lostpointercapture"
+    ].forEach(name => {
+        button.addEventListener(name, release);
+    });
+}
+
+// Sterowanie palcem na planszy
+
+function moveByTouch(e) {
+    const rect =
+        canvas.getBoundingClientRect();
+
+    const y =
+        (e.clientY - rect.top) *
+        HEIGHT / rect.height;
+
+    player.y = clamp(
+        y - PHEIGHT / 2,
+        0,
+        HEIGHT - PHEIGHT
+    );
+}
+
+let activePointer = null;
+
+canvas.addEventListener("pointerdown", e => {
+    if (
+        e.pointerType === "mouse" ||
+        state !== "playing"
+    ) return;
+
+    activePointer = e.pointerId;
+
+    try {
+        canvas.setPointerCapture?.(
+            e.pointerId
+        );
+    } catch {}
+
+    moveByTouch(e);
+});
+
+canvas.addEventListener("pointermove", e => {
+    if (
+        e.pointerId === activePointer &&
+        state === "playing"
+    ) {
+        moveByTouch(e);
+    }
+});
+
+[
+    "pointerup",
+    "pointercancel",
+    "lostpointercapture"
+].forEach(name => {
+    canvas.addEventListener(name, e => {
+        if (e.pointerId === activePointer) {
+            activePointer = null;
+        }
+    });
+});
+
+// Uruchomienie gry
+
+updateUI();
+requestAnimationFrame(frame);
+
+</script>
+</body>
+</html>

@@ -2,243 +2,353 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arcade Hub — Menu główne</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arcade Hub | Snake, Tetris, Pong</title>
 
-    <link rel="stylesheet" href="menu.css">
-    <script src="menu.js" defer></script>
+<style>
+:root {
+    --bg: #090f20;
+    --panel: #15223a;
+    --text: #f1f7ff;
+    --muted: #a6bbd2;
+    --accent: #56e6b6;
+    --line: #344760;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    background:
+        radial-gradient(circle at 15% 5%, #184744 0, transparent 32%),
+        var(--bg);
+    color: var(--text);
+    font-family: Arial, sans-serif;
+}
+
+header {
+    padding: 20px max(20px, calc((100vw - 1100px) / 2));
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.logo {
+    font-size: 25px;
+    font-weight: 900;
+    letter-spacing: -1px;
+}
+
+.logo span, h1 span { color: var(--accent); }
+
+select {
+    background: var(--panel);
+    color: white;
+    border: 1px solid var(--line);
+    padding: 9px 12px;
+    border-radius: 8px;
+}
+
+main {
+    max-width: 1100px;
+    margin: auto;
+    padding: 30px 20px;
+}
+
+section.hero { padding: 45px 0 30px; }
+
+small {
+    color: var(--accent);
+    letter-spacing: 2px;
+    font-weight: bold;
+}
+
+h1 {
+    font-size: clamp(40px, 7vw, 76px);
+    line-height: 1.02;
+    margin: 14px 0;
+}
+
+p {
+    color: var(--muted);
+    line-height: 1.55;
+}
+
+.hero p {
+    max-width: 550px;
+    font-size: 18px;
+}
+
+h2 { margin: 30px 0 20px; }
+
+.games {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 15px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.art {
+    height: 160px;
+    display: grid;
+    place-items: center;
+    font-size: 75px;
+    background: linear-gradient(135deg, #195447, #112b40);
+}
+
+.card:nth-child(2) .art {
+    background: linear-gradient(135deg, #334878, #201e4c);
+}
+
+.card:nth-child(3) .art {
+    background: linear-gradient(135deg, #5a355c, #1c2849);
+}
+
+.content {
+    padding: 20px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+h3 {
+    font-size: 25px;
+    margin: 0 0 8px;
+}
+
+.content p {
+    font-size: 14px;
+    flex: 1;
+    min-height: 72px;
+}
+
+a.play {
+    display: block;
+    background: var(--accent);
+    color: #072e25;
+    padding: 14px;
+    text-align: center;
+    text-decoration: none;
+    font-weight: bold;
+    border-radius: 8px;
+}
+
+.play:hover { background: #91ffdd; }
+
+footer {
+    text-align: center;
+    padding: 30px;
+    color: var(--muted);
+}
+
+.pill {
+    display: inline-block;
+    font-size: 11px;
+    color: var(--accent);
+    margin-bottom: 13px;
+    font-weight: bold;
+}
+
+a:focus-visible,
+select:focus-visible {
+    outline: 3px solid var(--accent);
+}
+
+@media (max-width: 760px) {
+    .games { grid-template-columns: 1fr; }
+    .art { height: 120px; font-size: 65px; }
+    .content p { min-height: 0; }
+    .hero { padding: 15px 0; }
+    h1 { font-size: 44px; }
+    header { padding: 15px; }
+}
+</style>
 </head>
 
 <body>
-    <div class="bg-glow bg-glow-one"></div>
-    <div class="bg-glow bg-glow-two"></div>
 
-    <header class="topbar">
-        <a class="logo" href="index.html">
-            <span class="logo-icon">▦</span>
-            <span>
-                ARCADE<span class="logo-color">HUB</span>
+<header>
+    <div class="logo">ARCADE<span>HUB</span></div>
+
+    <label>
+        <span data-pl="Język" data-en="Language">Język</span>
+
+        <select id="lang">
+            <option value="pl">Polski</option>
+            <option value="en">English</option>
+        </select>
+    </label>
+</header>
+
+<main>
+
+    <section class="hero">
+        <small
+            data-pl="TWOJE CENTRUM GIER"
+            data-en="YOUR GAME CENTER"
+        >
+            TWOJE CENTRUM GIER
+        </small>
+
+        <h1>
+            <span data-pl="JEDNO MENU." data-en="ONE MENU.">
+                JEDNO MENU.
             </span>
-        </a>
+            <br>
+            <span data-pl="TRZY GRY." data-en="THREE GAMES.">
+                TRZY GRY.
+            </span>
+        </h1>
 
-        <nav class="nav">
-            <a href="#gry">Gry</a>
-            <a href="#o-projekcie">O projekcie</a>
-        </nav>
+        <p
+            data-pl="Wybierz Snake, Tetris lub Pong. Graj na komputerze albo telefonie, bez instalowania gier."
+            data-en="Choose Snake, Tetris or Pong. Play on your computer or phone without installing games."
+        >
+            Wybierz Snake, Tetris lub Pong. Graj na komputerze
+            albo telefonie, bez instalowania gier.
+        </p>
+    </section>
 
-        <span class="top-label">
-            <span class="online-dot"></span>
-            2 GRY W KOLEKCJI
-        </span>
-    </header>
+    <h2 data-pl="Wybierz swoją grę" data-en="Choose your game">
+        Wybierz swoją grę
+    </h2>
 
-    <main>
-        <section class="hero">
-            <div class="hero-text">
-                <p class="eyebrow">
-                    <span class="tiny-square"></span>
-                    TWOJE CENTRUM GIER
+    <div class="games">
+
+        <!-- SNAKE -->
+        <article class="card">
+            <div class="art">🐍</div>
+
+            <div class="content">
+                <span class="pill">SNAKE WORLD</span>
+                <h3>Snake World</h3>
+
+                <p
+                    data-pl="Zbieraj owoce, omijaj przeszkody, odkrywaj cztery mapy i zapisuj rekordy."
+                    data-en="Collect fruit, avoid obstacles, discover four maps and save your records."
+                >
+                    Zbieraj owoce, omijaj przeszkody,
+                    odkrywaj cztery mapy i zapisuj rekordy.
                 </p>
 
-                <h1>
-                    JEDNO MENU.
-                    <br>
-                    <span>WIELE GIER.</span>
-                </h1>
+                <a
+                    class="play"
+                    href="snake.html"
+                    data-pl="ZAGRAJ TERAZ"
+                    data-en="PLAY NOW"
+                >
+                    ZAGRAJ TERAZ
+                </a>
+            </div>
+        </article>
 
-                <p class="hero-description">
-                    Wybierz grę i rozpocznij zabawę.
-                    Snake World i Tetris są już dostępne,
-                    a Pong dołączy w kolejnym projekcie.
+        <!-- TETRIS -->
+        <article class="card">
+            <div class="art">🧩</div>
+
+            <div class="content">
+                <span class="pill">TETRIS CLASSIC</span>
+                <h3>Tetris Classic</h3>
+
+                <p
+                    data-pl="Obracaj klocki, układaj je w linie i pobij własny rekord."
+                    data-en="Rotate falling blocks, clear full rows and beat your high score."
+                >
+                    Obracaj klocki, układaj je w linie
+                    i pobij własny rekord.
                 </p>
 
-                <div class="hero-actions">
-                    <a class="button button-primary" href="#gry">
-                        WYBIERZ GRĘ ↗
-                    </a>
-
-                    <a class="button button-outline" href="snake.html">
-                        ▶ ZAGRAJ W SNAKE
-                    </a>
-                </div>
-
-                <div class="hero-stats">
-                    <div>
-                        <strong>02</strong>
-                        <span>GRY DOSTĘPNE</span>
-                    </div>
-
-                    <div>
-                        <strong>∞</strong>
-                        <span>MOŻLIWOŚCI</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="preview">
-                <div class="preview-header">
-                    <span>
-                        <i></i>
-                        <i></i>
-                        <i></i>
-                    </span>
-
-                    <span>LIVE PREVIEW // SNAKE WORLD</span>
-                </div>
-
-                <div class="preview-board">
-                    <span class="snake-piece p1"></span>
-                    <span class="snake-piece p2"></span>
-                    <span class="snake-piece p3"></span>
-                    <span class="snake-piece p4"></span>
-                    <span class="snake-piece p5"></span>
-
-                    <span class="preview-fruit"></span>
-
-                    <span class="preview-block b1"></span>
-                    <span class="preview-block b2"></span>
-                    <span class="preview-block b3"></span>
-                </div>
-
-                <div class="preview-footer">
-                    <span>● SYSTEM ONLINE</span>
-                    <span>SCORE: 0240</span>
-                </div>
-            </div>
-        </section>
-
-        <section id="gry" class="library">
-
-            <div class="section-top">
-                <div>
-                    <p class="eyebrow">// BIBLIOTEKA GIER</p>
-
-                    <h2>WYBIERZ SWOJĄ GRĘ</h2>
-
-                    <p class="section-description">
-                        Wybierz Snake World, Tetris 
-                    </p>
-                </div>
-
-                <span class="results" id="visible-count">
-                    2 gry
-                </span>
-            </div>
-
-            <div class="filters">
-                <button
-                    class="filter-btn active"
-                    type="button"
-                    data-filter="all"
-                    aria-pressed="true"
+                <a
+                    class="play"
+                    href="tetris.html"
+                    data-pl="ZAGRAJ TERAZ"
+                    data-en="PLAY NOW"
                 >
-                    Wszystkie <span>02</span>
-                </button>
-
-                <button
-                    class="filter-btn"
-                    type="button"
-                    data-filter="available"
-                    aria-pressed="false"
-                >
-                    Dostępne <span>02</span>
-                </button>
+                    ZAGRAJ TERAZ
+                </a>
             </div>
+        </article>
 
-            <div class="games-grid">
+        <!-- PONG -->
+        <article class="card">
+            <div class="art">🏓</div>
 
-                <article
-                    class="game-card snake-card"
-                    data-status="available"
+            <div class="content">
+                <span class="pill">PONG CLASSIC</span>
+                <h3>Pong Classic</h3>
+
+                <p
+                    data-pl="Odbijaj piłkę. Graj z komputerem albo z drugą osobą."
+                    data-en="Hit the ball. Play against the computer or a friend."
                 >
-                    <div class="card-art snake-art">
-                        <span class="art-grid"></span>
-                        <span class="art-emoji">🐍</span>
-                        <span class="art-word">SNAKE</span>
-                    </div>
+                    Odbijaj piłkę. Graj z komputerem
+                    albo z drugą osobą.
+                </p>
 
-                    <div class="card-body">
-                        <span class="status ready">
-                            <span></span>
-                            DOSTĘPNA
-                        </span>
-
-                        <h3>Snake World</h3>
-
-                        <p>
-                            Klasyczny Snake z czterema mapami,
-                            poziomami trudności, rankingiem
-                            i własnymi ustawieniami.
-                        </p>
-
-                        <div class="tags">
-                            <span>ARCADE</span>
-                            <span>1 GRACZ</span>
-                            <span>GOTOWA</span>
-                        </div>
-
-                        <a class="play-link" href="snake.html">
-                            ZAGRAJ TERAZ
-                            <span>↗</span>
-                        </a>
-                    </div>
-                </article>
-
-
-
-                <article
-                    class="game-card tetris-card"
-                    data-status="available"
+                <a
+                    class="play"
+                    href="pong.html"
+                    data-pl="ZAGRAJ TERAZ"
+                    data-en="PLAY NOW"
                 >
-                    <div class="card-art tetris-art">
-                        <div class="tetris-shape">
-                            <i></i>
-                            <i></i>
-                            <i></i>
-                            <i></i>
-                        </div>
-                        <span class="art-word">TETRIS</span>
-                    </div>
-
-                    <div class="card-body">
-                        <span class="status ready">
-                            <span></span>
-                            DOSTĘPNA
-                        </span>
-
-                        <h3>Tetris Classic</h3>
-
-                        <p>
-                            Układaj spadające klocki,
-                            usuwaj pełne linie i zdobywaj
-                            coraz więcej punktów.
-                        </p>
-
-                        <div class="tags">
-                            <span>PUZZLE</span>
-                            <span>1 GRACZ</span>
-                            <span>GOTOWA</span>
-                        </div>
-
-                        <a class="play-link" href="tetris.html">
-                            ZAGRAJ TERAZ
-                            <span>↗</span>
-                        </a>
-                    </div>
-                </article>
-
+                    ZAGRAJ TERAZ
+                </a>
             </div>
-        </section>
-            <span class="about-icon">
-                &lt;/&gt;
-            </span>
-        </section>
-    </main>
+        </article>
 
-    <footer class="footer">
-        ARCADE<span>HUB</span>
-        <span class="footer-dot">•</span>
-    </footer>
+    </div>
+</main>
+
+<footer
+    data-pl="Arcade Hub. Projekt wykonany w HTML, CSS i JavaScript."
+    data-en="Arcade Hub. Built with HTML, CSS and JavaScript."
+>
+    Arcade Hub. Projekt wykonany w HTML, CSS i JavaScript.
+</footer>
+
+<script>
+const languageSelect = document.getElementById("lang");
+let language = "pl";
+
+try {
+    language = localStorage.getItem("snake-language") === "en"
+        ? "en"
+        : "pl";
+} catch (e) {}
+
+function translate() {
+    document.documentElement.lang = language;
+    languageSelect.value = language;
+
+    document.querySelectorAll("[data-pl]").forEach(el => {
+        el.textContent = el.dataset[language];
+    });
+}
+
+languageSelect.addEventListener("change", () => {
+    language = languageSelect.value;
+
+    try {
+        localStorage.setItem("snake-language", language);
+    } catch (e) {}
+
+    translate();
+});
+
+translate();
+</script>
+
 </body>
 </html>
